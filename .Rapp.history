@@ -1,0 +1,1603 @@
+order(Ynodes, Anodes)
+Ynodes
+order(c(Ynodes, Anodes))
+nodes = c(Ynodes, Anodes)[order(c(Ynodes, Anodes))]
+nodes
+head(O[,nodes])
+O_long = reshape(O[,nodes], direction="long")
+O_long = reshape(O[,nodes], varying=1:length(nodes), direction="long")
+summary(Indometh)#
+wide <- reshape(Indometh, v.names = "conc", idvar = "Subject",#
+                timevar = "time", direction = "wide")
+head(wide)
+head(O)
+O = cbind(id=1:nrow(O), O)
+O = generateData(n=n, time.pt=time.pt)$O
+nodes = c(Ynodes, Anodes)[order(c(Ynodes, Anodes))]#
+O_long = reshape(cbind(id=1:nrow(O), O[,nodes]), direction="long")
+wide
+O_long = reshape(O[,nodes], direction="long", varying = list(1:length(nodes)))
+head(O_long)
+head(O[,nodes])
+O_long = reshape(O[,nodes], direction="long", varying = list(Anodes, Ynodes))
+head(O[,c(Ynodes, Anodes)])
+O_long = reshape(O[,c(Ynodes, Anodes)], direction="long", varying = list(c(1:10, 11:20)))
+head(O_long)
+O_long = O_long[order(O_long$id, O_long$time),]
+head(O_long)
+O_long = reshape(O[,c(Ynodes, Anodes)], direction="long", varying = list(c(1:10), c(11:20)))
+head(O_long)
+O_long = O_long[order(O_long$id, O_long$time),]
+head(O_long)
+subset(O_long, id==1)
+O_long$t0 = O_long$time - 1
+survfit(Surv(t0, time, Y.1)~1, data=subset(O_long, A.0==0))
+require(survival)
+survfit(Surv(t0, time, Y.1)~1, data=subset(O_long, A.0==0))
+kmFit = survfit(Surv(t0, time, Y.1)~1, data=subset(O_long, A.0==0))
+summary(kmFit, times=10)
+O = generateData(n=n, time.pt=time.pt)$O	#
+#
+require(ltmle)#
+gform.uadj = Qform.uadj = NULL#
+for(i in 1:time.pt) {#
+	gform.uadj = c(gform.uadj, paste("A.", i-1, " ~ 1", sep=""))#
+	Qform.uadj = c(Qform.uadj, paste("Q.kplus1 ~ 1", sep=""))#
+	names(Qform.uadj)[length(Qform.uadj)] = paste("Y.", i, sep="")#
+}#
+Lnodes = paste(rep(c("L1.","L2."), times=(time.pt-1)), rep(1:(time.pt-1), each=2), sep="")#
+Ynodes = grep("^Y.", names(O)) #
+Anodes = grep("^A.", names(O))	#
+#
+fit_0.uadj = ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, survivalOutcome=TRUE, Qform=Qform.uadj, gform=gform.uadj, abar=rep(0,time.pt), gbounds=c(0.001,1), deterministic.g.function=MaintainTreatment, estimate.time=FALSE, stratify=TRUE, IC.variance.only=TRUE)#
+gcomp_0.uadj = ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, survivalOutcome=TRUE, Qform=Qform.uadj, gform=gform.uadj, abar=rep(0,time.pt), gbounds=c(0.001,1), deterministic.g.function=MaintainTreatment, estimate.time=FALSE, stratify=TRUE, IC.variance.only=TRUE, gcomp=TRUE)#
+fit_0.uadj$estimates; gcomp_0.uadj$estimates
+require(survival)#
+O_long = reshape(O[,c(Ynodes, Anodes)], direction="long", varying = list(c(1:10), c(11:20)))#
+O_long$t0 = O_long$time - 1#
+kmFit = survfit(Surv(t0, time, Y.1)~1, data=subset(O_long, A.0==0))#
+summary(kmFit, times=10)
+time.pt
+plot(kmFit)
+O_long$prevY = c(NA, O_long$Y.1[1:(nrow(O_long)-1)])
+head(O_long)
+O_long$prevY[O_long$t0==0] = 0
+head(O_long)
+kmFit = survfit(Surv(t0, time, Y.1)~1, data=subset(O_long, prevY==0 & A.0==0))#
+plot(kmFit)#
+summary(kmFit, times=10)
+head(subset(O_long, prevY==0 & A.0==0))
+O_long$prevY = c(NA, O_long$Y.1[1:(nrow(O_long)-1)])#
+O_long$prevY[O_long$time==1] = 0
+table(O_long$prevY)
+tmp = subset(O_long, prevY==0 & A.0==0)
+head(tmp)
+tst = with(tmp, tapply(Y.1, id, sum))
+table(tst)
+O_long = reshape(O[,c(Ynodes, Anodes)], direction="long", varying = list(c(1:10), c(11:20)))#
+O_long = O_long[order(O_long$id, O_long$time),]#
+O_long$t0 = O_long$time - 1#
+O_long$prevY = c(NA, O_long$Y.1[1:(nrow(O_long)-1)])#
+O_long$prevY[O_long$time==1] = 0
+tmp = subset(O_long, prevY==0 & A.0==0)#
+tst = with(tmp, tapply(Y.1, id, sum))
+table(tst)
+kmFit = survfit(Surv(t0, time, Y.1)~1, data=subset(O_long, prevY==0 & A.0==0))
+summary(kmFit, times=10)
+1-.388
+fit_0.uadj$estimates; gcomp_0.uadj$estimates
+names(summary(kmFit, times=10))
+summary(kmFit, times=10)$surv
+1-summary(kmFit, times=10)$surv
+#####################
+## GENERATES DATA ###
+#####################
+n = 500#
+time.pt = 10#
+rexpit  = function(x) rbinom(n=length(x), size=1, prob=x)#
+QW1     = function(n) rnorm(n, mean=0, sd=1)#
+QW2     = function(n) rep(plogis(-1), n)#
+QW3     = function(n) rnorm(n, mean=0, sd=1)#
+QY.t    = function(prev_y, w1, w2, prev_l1, prev_l2, prev_a) ifelse(prev_y==1, 1, plogis(-1.9 + 1.2*w1 - 2.4*w2 - 0.8*prev_l1 - 1.6*prev_l2 + 1*prev_l1*prev_l2 - 1*prev_a))#
+QL1.t   = function(y, w1, prev_l1, prev_l2, prev_a) ifelse(y==1, prev_l1, 0.1 + 0.4*w1 + 0.6*prev_l1 - 0.7*prev_l2 - 0.45*prev_a - rnorm(length(w1), sd=0.5))#
+QL2.t   = function(y, w1, w2, prev_l1, prev_l2, prev_a) ifelse(y==1, prev_l2, -0.55 + 0.5*w1 + 0.75*w2 + 0.1*prev_l1 + 0.3*prev_l2 - 0.75*prev_a - rnorm(length(w1), sd=0.5))#
+gA.t    = function(y, w1, w2, w3, l1, l2, prev_a) ifelse(y==1, prev_a, ifelse(prev_a==1, 1, plogis(-2.5 - 0.5*w1 + 0.75*w2 + 1*w3 + 0.8*l1 - 0.8*l2 + 0.8*l1*l2)))#
+#
+generateData = function(n, time.pt, abar=NULL) {#
+	g.matrix = matrix(ncol=time.pt, nrow=n, dimnames=list(NULL, paste0("A.", 0:(time.pt-1))))#
+	## CHECKS ###
+	if(time.pt==0) stop("time.pt has to be greater than 0")#
+	if(any(cummax(abar)!=abar)) stop("A is a counting process & cannot decrease")#
+	if(!is.null(abar) & length(abar) != time.pt) stop("abar has to be either NULL or length of time.pt")#
+	mechs = NULL#
+	if(!exists("QW1")) mechs = c(mechs, "QW1")#
+	if(!exists("QW2")) mechs = c(mechs, "QW2")#
+	if(!exists("QW3")) mechs = c(mechs, "QW3")#
+	if(!exists("QL1.t")) mechs = c(mechs, "QL1.t")#
+	if(!exists("QL2.t")) mechs = c(mechs, "QL2.t")#
+	if(!exists("gA.t")) mechs = c(mechs, "gA.t")#
+	if(!exists("QY.t")) mechs = c(mechs, "QY.t")	#
+	if(!is.null(mechs)) stop(paste("All data generating mechanisms must be defined.\n", paste(mechs, collapse=", "), "aren't defined."))#
+	## INITIALIZATION ###
+	o.names = NULL#
+	for(i in 0:time.pt){#
+		if(i<time.pt) {#
+			o.names = c(o.names, paste0(c("Y", "L1","L2", "A"), ".", i))#
+		} else {#
+			o.names = c(o.names, paste0(c("Y"), ".", i))#
+		}	#
+	}#
+	O = matrix(nrow=n, ncol=length(o.names)+3, dimnames=list(NULL, c("W1", "W2", "W3", o.names)))#
+	## OBSERVED VALUES ###
+	O[,"W1"] = QW1(n)#
+	O[,"W2"] = rexpit(QW2(n))#
+	O[,"W3"] = QW3(n)#
+	for(i in 0:time.pt){#
+		#nb. "prev" values are set to 0 for t=0#
+		if(i==0) {#
+			#Y(t)#
+			O[,"Y.0"] = rep(0,n)#
+			#L1(t)#
+			O[,"L1.0"] = QL1.t(y=O[,"Y.0"], w1=O[,"W1"], prev_l1=rep(0, n), prev_l2=rep(0, n), prev_a=rep(0, n))#
+			#L2(t)#
+			O[,"L2.0"] = QL2.t(y=O[,"Y.0"], w1=O[,"W1"], w2=O[,"W2"], prev_l1=rep(0, n), prev_l2=rep(0, n), prev_a=rep(0, n))#
+			#A(t)#
+			if(is.null(abar)) {#
+				g.matrix[,"A.0"] = gA.t(y=O[,"Y.0"], w1=O[,"W1"], w2=O[,"W2"], w3=O[,"W3"], l1=O[,"L1.0"], l2=O[,"L2.0"], prev_a=rep(0, n))#
+				O[,"A.0"] = rexpit(g.matrix[,"A.0"])#
+			} else {#
+				g.matrix[,"A.0"] = gA.t(y=O[,"Y.0"], w1=O[,"W1"], w2=O[,"W2"], w3=O[,"W3"], l1=O[,"L1.0"], l2=O[,"L2.0"], prev_a=rep(0, n))#
+				O[,"A.0"] = rep(abar[i+1], n)#
+			}#
+		} else if (i<time.pt) {#
+			#Y(t)#
+			O[,paste0("Y.",i)] = rexpit(QY.t(prev_y=O[,paste0("Y.",i-1)], w1=O[,"W1"], w2=O[,"W2"], prev_l1=O[,paste0("L1.",i-1)], prev_l2=O[,paste0("L2.",i-1)], prev_a=O[,paste0("A.",i-1)]))#
+			#L1(t)#
+			O[,paste0("L1.",i)] = QL1.t(y=O[,paste0("Y.",i)], w1=O[,"W1"], prev_l1=O[,paste0("L1.",i-1)], prev_l2=O[,paste0("L2.",i-1)], prev_a=O[,paste0("A.",i-1)])#
+			#L2(t)#
+			O[,paste0("L2.",i)] = QL2.t(y=O[,paste0("Y.",i)], w1=O[,"W1"], w2=O[,"W2"], prev_l1=O[,paste0("L1.",i-1)], prev_l2=O[,paste0("L2.",i-1)], prev_a=O[,paste0("A.",i-1)])#
+			#A(t)#
+			if(is.null(abar)) {#
+				g.matrix[,paste0("A.",i)] = gA.t(y=O[,paste0("Y.",i)], w1=O[,"W1"], w2=O[,"W2"], w3=O[,"W3"], l1=O[,paste0("L1.",i)], l2=O[,paste0("L2.",i)], prev_a=O[,paste0("A.",i-1)])#
+				O[,paste0("A.",i)] = rexpit(g.matrix[,paste0("A.",i)])#
+			} else {#
+				g.matrix[,paste0("A.",i)] = gA.t(y=O[,paste0("Y.",i)], w1=O[,"W1"], w2=O[,"W2"], w3=O[,"W3"], l1=O[,paste0("L1.",i)], l2=O[,paste0("L2.",i)], prev_a=O[,paste0("A.",i-1)])#
+				O[,paste0("A.",i)] = rep(abar[i+1], n)#
+				O[O[,paste0("Y.",i)]==1,paste0("A.",i)] = O[O[,paste0("Y.",i)]==1,paste0("A.",i-1)]#
+			}#
+		} else if (i==time.pt) {#
+			#Y(t)#
+			O[,paste0("Y.",i)] = rexpit(QY.t(prev_y=O[,paste0("Y.",i-1)], w1=O[,"W1"], w2=O[,"W2"], prev_l1=O[,paste0("L1.",i-1)], prev_l2=O[,paste0("L2.",i-1)], prev_a=O[,paste0("A.",i-1)]))#
+		}#
+	}#
+	O = data.frame(O)#
+	O$Y.0 = NULL#
+	return(list(O=O, g.matrix=g.matrix))#
+}#
+################
+## ESTIMATES ###
+################
+O = generateData(n=n, time.pt=time.pt)$O	#
+#
+require(ltmle)#
+gform.uadj = Qform.uadj = NULL#
+for(i in 1:time.pt) {#
+	gform.uadj = c(gform.uadj, paste("A.", i-1, " ~ 1", sep=""))#
+	Qform.uadj = c(Qform.uadj, paste("Q.kplus1 ~ 1", sep=""))#
+	names(Qform.uadj)[length(Qform.uadj)] = paste("Y.", i, sep="")#
+}#
+Lnodes = paste(rep(c("L1.","L2."), times=(time.pt-1)), rep(1:(time.pt-1), each=2), sep="")#
+Ynodes = grep("^Y.", names(O)) #
+Anodes = grep("^A.", names(O))	#
+#
+fit_0.uadj = ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, survivalOutcome=TRUE, Qform=Qform.uadj, gform=gform.uadj, abar=rep(0,time.pt), gbounds=c(0.001,1), deterministic.g.function=MaintainTreatment, estimate.time=FALSE, stratify=TRUE, IC.variance.only=TRUE)#
+gcomp_0.uadj = ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, survivalOutcome=TRUE, Qform=Qform.uadj, gform=gform.uadj, abar=rep(0,time.pt), gbounds=c(0.001,1), deterministic.g.function=MaintainTreatment, estimate.time=FALSE, stratify=TRUE, IC.variance.only=TRUE, gcomp=TRUE)#
+cat("Unadjusted estimates\n")#
+fit_0.uadj$estimates; gcomp_0.uadj$estimates#
+## KM FIT ###
+require(survival)#
+O_long = reshape(O[,c(Ynodes, Anodes)], direction="long", varying = list(c(1:10), c(11:20)))#
+O_long = O_long[order(O_long$id, O_long$time),]#
+O_long$t0 = O_long$time - 1#
+O_long$prevY = c(NA, O_long$Y.1[1:(nrow(O_long)-1)])#
+O_long$prevY[O_long$time==1] = 0#
+kmFit = survfit(Surv(t0, time, Y.1)~1, data=subset(O_long, prevY==0 & A.0==0))#
+plot(kmFit)#
+cat("Unadjusted estimate\n")#
+1-summary(kmFit, times=10)
+1-summary(kmFit, times=10)$surv
+require(SuperLearner)
+listWrappers()
+tmp = expand.grid(t1 = seq(0,1,.1), t2=seq(0,1,.1), t3 = 1-t1-t2)
+library(ltodt)#
+library(ggplot2)
+set.seed(1)#
+W1 = rnorm(10000); W2 = rnorm(10000); W3=rnorm(10000); W4 = rnorm(10000)#
+Y_a0 = ltodt:::Q.AW(a=0, w=cbind(W1=W1, W2=W2, W3=W3, W4=W4))#
+Y_a1 = ltodt:::Q.AW(a=1, w=cbind(W1=W1, W2=W2, W3=W3, W4=W4))#
+Y_d = ltodt:::Q.AW(a=ifelse(-0.885<=W3 & W3<=0.84, 0, 1), w=cbind(W1=W1, W2=W2, W3=W3, W4=W4))#
+cat("Mean values\nY_a1:\t", mean(Y_a1), "\nY_ao:\t", mean(Y_a0), "\nY_d:\t", mean(Y_d), "\n")#
+###########
+## DATA ###
+###########
+set.seed(100)#
+O = generateData(n=1000)
+set.seed(100)#
+O = generateData(n=1000)#
+#################
+## ESTIMATION ###
+#################
+tmp = ltodt(data=O, Anodes=c("A"), Ynodes=c("Y"), Vnodes=c("W3"), gform=matrix(0.5, nrow=nrow(O), ncol=1))
+W3 = seq(-3,3,.005)#
+QbarW3 = matrix(nrow=length(W3), ncol=2, dimnames=list(NULL, c("Qa0", "Qa1")))#
+set.seed(100)#
+for(i in 1:length(W3)) {#
+	Y_a0 = ltodt:::Q.AW(a=0, w=cbind(W1=W1, W2=W2, W3=W3[i], W4=W4))#
+	Y_a1 = ltodt:::Q.AW(a=1, w=cbind(W1=W1, W2=W2, W3=W3[i], W4=W4))#
+	QbarW3[i,"Qa0"] = mean(Y_a0)#
+	QbarW3[i,"Qa1"] = mean(Y_a1)#
+	Y_a0 = Y_a1 = NULL#
+}#
+QbarW3.blip = QbarW3[,"Qa1"] - QbarW3[,"Qa0"]#
+p1 = ggplot(data.frame(W3=W3, Qbar0.W3=QbarW3.blip), aes(x=W3, y=Qbar0.W3)) +#
+		geom_line(size=1.5) + #
+		scale_x_continuous(limits = c(-3, 3)) +#
+		geom_hline(yintercept=0, colour="gray20", size=1.5, linetype = "solid") +#
+		geom_vline(xintercept=-0.885, colour="gray20", size=1.5, linetype = "dashed") +#
+		geom_vline(xintercept=0.84, colour="gray20", size=1.5, linetype = "dashed") +#
+		labs(title="Expected treatment effect", x=expression(W[3]), y=expression(paste(bar(Q)[0], "(W"[3], ")"))) + #
+		geom_line(data = data.frame(W3=W3, odt=predict(tmp$odt, newdata=data.frame(W3=W3))), aes(x=W3, y=odt), size = 1.5, color = "red")#
+p1
+tmp = 30*rexp(10000, .1)
+summary(tmp)
+pA = rep(.1, 10)
+A = matrix(0, ncol=10, nrow=10000)
+Atmp = rbinom(10000, 1, .1)
+summary(Atmp)
+tmp2 = tmp
+theta = -.2
+A = matrix(0, ncol=10, nrow=10000)#
+for(i in 2:10) {#
+	Atmp = rbinom(10000, 1, .1)	#
+	A[,i] = pmax(A[,i-1], Atmp)#
+	tmp2 = ifelse(A[,i-1]==0 & A[,i]==1 & tmp2>=(i-1)*30, tmp2*(-theta), tmp2)#
+}
+alt = apply(A, 1, max)
+table(alt)
+head(A)
+colnames(A) = paste("A", 1:10, sep=".")
+O = data.frame(id=1:10000, T=tmp2, A)
+head(O)
+O.long = reshape(O, direction="wide", idvar="id", varying=list(3:12))
+O.long = reshape(O, direction="wide", idvar="id", varying=list(c(3:12)))
+O = data.frame(id=1:10000, T0=tmp, T=tmp2, A)
+head(O)
+ncol(O)
+O.long = reshape(O, direction="wide", idvar="id", varying=c(4:13))
+O.long = reshape(data=O, direction="long", idvar="id", varying=c(4:13))
+head(O.long)
+O.long = O.long[order(O.long$id, O.long$time),]
+head(O.long)
+O.long = subset(O.long, T>=(time-1)*30)
+head(O.long)
+O.long$startTime = (O.long$time-1)*30#
+O.long$endTime = (O.long$time)*30
+head(O.long)
+O.long = reshape(data=O, direction="long", idvar="id", varying=c(4:13))#
+O.long = O.long[order(O.long$id, O.long$time),]#
+O.long$startTime = (O.long$time-1)*30#
+O.long$endTime = (O.long$time)*30
+head(O.long)
+O.long = subset(O.long, T>=startTime)
+head(O.long)
+O.long$endTime = ifelse(O.long$startTime < O.long$T & O.long$T <= O.long$endTime, O.long$T, O.long$endTime)
+head(O.long)
+set.seed(1)#
+theta = -.2#
+tmp = 30*rexp(10000, .1)#
+tmp2 = tmp#
+summary(tmp)#
+#
+A = matrix(0, ncol=10, nrow=10000)#
+for(i in 2:10) {#
+	Atmp = rbinom(10000, 1, .1)	#
+	A[,i] = pmax(A[,i-1], Atmp)#
+	tmp2 = ifelse(A[,i-1]==0 & A[,i]==1 & tmp2>=(i-1)*30, tmp2*exp(-theta), tmp2)#
+}#
+#
+alt = apply(A, 1, max)#
+table(alt)
+colnames(A) = paste("A", 1:10, sep=".")#
+O = data.frame(id=1:10000, T0=tmp, T=tmp2, A)#
+O.long = reshape(data=O, direction="long", idvar="id", varying=c(4:13))#
+O.long = O.long[order(O.long$id, O.long$time),]#
+O.long$startTime = (O.long$time-1)*30#
+O.long$endTime = (O.long$time)*30#
+O.long = subset(O.long, T>=startTime)#
+O.long$endTime = ifelse(O.long$startTime < O.long$T & O.long$T <= O.long$endTime, O.long$T, O.long$endTime)
+head(O.long)
+head(O.long, 20)
+head(O.long, 40)
+set.seed(1)#
+theta = -.2#
+tmp = 10*rexp(10000, .1)#
+tmp2 = tmp#
+summary(tmp)#
+#
+A = matrix(0, ncol=10, nrow=10000)#
+for(i in 2:10) {#
+	Atmp = rbinom(10000, 1, .1)	#
+	A[,i] = pmax(A[,i-1], Atmp)#
+	tmp2 = ifelse(A[,i-1]==0 & A[,i]==1 & tmp2>=(i-1)*30, tmp2*exp(-theta), tmp2)#
+}#
+alt = apply(A, 1, max)#
+table(alt)#
+#
+colnames(A) = paste("A", 1:10, sep=".")#
+O = data.frame(id=1:10000, T0=tmp, T=tmp2, A)#
+O.long = reshape(data=O, direction="long", idvar="id", varying=c(4:13))#
+O.long = O.long[order(O.long$id, O.long$time),]#
+O.long$startTime = (O.long$time-1)*30#
+O.long$endTime = (O.long$time)*30#
+O.long = subset(O.long, T>=startTime)#
+O.long$endTime = ifelse(O.long$startTime < O.long$T & O.long$T <= O.long$endTime, O.long$T, O.long$endTime)#
+head(O.long, 20)
+O.long$Y = ifelse(O.long$endTime==O.long$T, 1, 0)
+table(O$Y)
+head(O.long, 20)
+table(O.long$Y)
+coxFit = coxph(Surv(startTime, endTime, Y) ~ A + cluster(id), data=O.long)
+require(survival)#
+coxFit = coxph(Surv(startTime, endTime, Y) ~ A + cluster(id), data=O.long)
+summary(coxFit)
+set.seed(1)#
+theta = -.2#
+n = 100000#
+tmp = 10*rexp(n, .1)#
+tmp2 = tmp#
+summary(tmp)#
+#
+A = matrix(0, ncol=10, nrow=n)#
+for(i in 2:10) {#
+	Atmp = rbinom(n, 1, .1)	#
+	A[,i] = pmax(A[,i-1], Atmp)#
+	tmp2 = ifelse(A[,i-1]==0 & A[,i]==1 & tmp2>=(i-1)*10, tmp2*exp(-theta), tmp2)#
+}#
+alt = apply(A, 1, max)#
+table(alt)#
+#
+colnames(A) = paste("A", 1:10, sep=".")#
+O = data.frame(id=1:n, T0=tmp, T=tmp2, A)#
+O.long = reshape(data=O, direction="long", idvar="id", varying=c(4:13))#
+O.long = O.long[order(O.long$id, O.long$time),]#
+O.long$startTime = (O.long$time-1)*10#
+O.long$endTime = (O.long$time)*10#
+O.long = subset(O.long, T>=startTime)#
+O.long$endTime = ifelse(O.long$startTime < O.long$T & O.long$T <= O.long$endTime, O.long$T, O.long$endTime)#
+O.long$Y = ifelse(O.long$endTime==O.long$T, 1, 0)#
+head(O.long, 20)#
+table(O.long$Y)#
+#
+require(survival)#
+coxFit = coxph(Surv(startTime, endTime, Y) ~ A + cluster(id), data=O.long)#
+summary(coxFit)
+set.seed(1)#
+theta = -.2#
+n = 50000#
+tmp = 10*rexp(n, .1)#
+tmp2 = tmp#
+summary(tmp)#
+#
+A = matrix(0, ncol=10, nrow=n)#
+for(i in 2:10) {#
+	Atmp = rbinom(n, 1, .1)	#
+	A[,i] = pmax(A[,i-1], Atmp)#
+	tmp2 = ifelse(A[,i-1]==0 & A[,i]==1 & tmp2>=(i-1)*10, tmp2*exp(-theta), tmp2)#
+}#
+alt = apply(A, 1, max)#
+table(alt)#
+#
+colnames(A) = paste("A", 1:10, sep=".")#
+O = data.frame(id=1:n, T0=tmp, T=tmp2, A)#
+O.long = reshape(data=O, direction="long", idvar="id", varying=c(4:13))#
+O.long = O.long[order(O.long$id, O.long$time),]#
+O.long$startTime = (O.long$time-1)*10#
+O.long$endTime = (O.long$time)*10#
+O.long = subset(O.long, T>=startTime)#
+O.long$endTime = ifelse(O.long$startTime < O.long$T & O.long$T <= O.long$endTime, O.long$T, O.long$endTime)#
+O.long$Y = ifelse(O.long$endTime==O.long$T, 1, 0)#
+head(O.long, 20)#
+table(O.long$Y)
+R = rbinom(n, 1, .5)#
+T = ifelse(R==1, tmp*exp(-theta), tmp)
+coxFit = coxph(Surv(T, rep(1,n))~R)
+summary(coxFit)
+head(O.long, 20)
+tst = tapply(O.long$A, O.long$id, max)
+table(tst)
+head(which(tst==0))
+subset(O.long, id==3)
+tst2 =tapply(O.long$time, O.long$id, max)
+head(which(tst==0 & tst2==10))
+subset(O.long, id==6)
+set.seed(1)#
+theta = -.2#
+n = 50000#
+tmp = 10*rexp(n, .1)#
+tmp2 = tmp#
+summary(tmp)#
+#
+A = matrix(0, ncol=10, nrow=n)#
+for(i in 2:10) {#
+	Atmp = rbinom(n, 1, .1)	#
+	A[,i] = pmax(A[,i-1], Atmp)#
+	switched = A[,i-1]==0 & A[,i]==1 & tmp>=(i-1)*10#
+	tmp2 = ifelse(switched, (tmp2-(i-1)*10)*exp(-theta) + (i-1)*10, tmp2)#
+}#
+alt = apply(A, 1, max)#
+table(alt)#
+#
+colnames(A) = paste("A", 1:10, sep=".")#
+O = data.frame(id=1:n, T0=tmp, T=tmp2, A)#
+O.long = reshape(data=O, direction="long", idvar="id", varying=c(4:13))#
+O.long = O.long[order(O.long$id, O.long$time),]#
+O.long$startTime = (O.long$time-1)*10#
+O.long$endTime = (O.long$time)*10#
+O.long = subset(O.long, T>=startTime)#
+O.long$endTime = ifelse(O.long$startTime < O.long$T & O.long$T <= O.long$endTime, O.long$T, O.long$endTime)#
+O.long$Y = ifelse(O.long$endTime==O.long$T, 1, 0)#
+head(O.long, 20)#
+table(O.long$Y)
+subset(O.long, id==6)
+head(O.long, 20)
+coxFit = coxph(Surv(startTime, endTime, Y) ~ A + cluster(id), data=O.long)#
+summary(coxFit)
+coef(coxFit)
+coef(coxFit)[[1]]
+set.seed(1)#
+#
+estimates = rep(NA, 1000)#
+theta = -.2#
+n = 1000#
+#
+for(j in 1:1000){#
+tmp = 10*rexp(n, .1)#
+tmp2 = tmp#
+summary(tmp)#
+A = matrix(0, ncol=10, nrow=n)#
+for(i in 2:10) {#
+	Atmp = rbinom(n, 1, .1)	#
+	A[,i] = pmax(A[,i-1], Atmp)#
+	switched = A[,i-1]==0 & A[,i]==1 & tmp>=(i-1)*10#
+	tmp2 = ifelse(switched, (tmp2-(i-1)*10)*exp(-theta) + (i-1)*10, tmp2)#
+}#
+alt = apply(A, 1, max)#
+table(alt)#
+#
+colnames(A) = paste("A", 1:10, sep=".")#
+O = data.frame(id=1:n, T0=tmp, T=tmp2, A)#
+O.long = reshape(data=O, direction="long", idvar="id", varying=c(4:13))#
+O.long = O.long[order(O.long$id, O.long$time),]#
+O.long$startTime = (O.long$time-1)*10#
+O.long$endTime = (O.long$time)*10#
+O.long = subset(O.long, T>=startTime)#
+O.long$endTime = ifelse(O.long$startTime < O.long$T & O.long$T <= O.long$endTime, O.long$T, O.long$endTime)#
+O.long$Y = ifelse(O.long$endTime==O.long$T, 1, 0)#
+#
+coxFit = coxph(Surv(startTime, endTime, Y) ~ A + cluster(id), data=O.long)#
+estimates[j] = coef(coxFit)[[1]]#
+}
+mean(estimates)
+devtools::load_all("~/Downloads/mi")
+devtools::build("~/Downloads/mi")
+search.url <- function(query,#
+#
+                       site.url   = "http://atlanta.craigslist.org",#
+#
+                       category   = "sss",#
+#
+                       title.only = TRUE,#
+#
+                       min.price  = integer(0),#
+#
+                       max.price  = integer(0),#
+#
+                       pic.only   = TRUE) {#
+## This function creates a search URL on Craigslist.#
+#
+###
+#
+## Inputs:#
+#
+##    - query:      search string#
+#
+##    - site.url:   Craigslist site URL#
+#
+##    - category:   a three-letter code for the category; some examples#
+#
+##                   "sss": all for sale/wanted, "zip": free stuff#
+#
+##    - title.only: boolean for restricting the search to add titles#
+#
+##    - min.price   minimum price#
+#
+##    - max.price:  maximum price#
+#
+##    - pic.only:   boolean for restricting the search to adds with pics#
+#
+###
+#
+## Output: a string representing a Craigslist search URL#
+   search <- list(query    = gsub(" ", "+", query),#
+#
+                  catAbb   = category,#
+#
+                  srchType = ifelse(title.only, "T", "A"),#
+#
+                  minAsk   = as.integer(min.price),#
+#
+                  maxAsk   = as.integer(max.price),#
+#
+                  hasPic   = as.numeric(pic.only))#
+   valid <- sapply(search, length) > 0L#
+   search.str  <- paste(names(search)[valid], search[valid],#
+#
+                        sep = "=", collapse = "&")#
+#
+   search.url  <- paste(site.url, "/search/sss?", search.str, sep = "")#
+   return(search.url)#
+#
+}#
+image.gallery <- function(url, ncol = 3L) {#
+## This function reformats the contents of a Craigslist search result URL#
+#
+## into an image gallery, opened into the default browser#
+#
+###
+#
+## Inputs:#
+#
+##    - url:  a Craigslist search URL as created by search.url#
+#
+##    - ncol: the number of columns for the output image gallery#
+#
+###
+#
+## Output: none. As a side effect, a browser is opened.#
+   require(RCurl)#
+#
+   require(stringr)#
+#
+   require(R2HTML)#
+   scrap     <- getURL(url)#
+#
+   adds      <- str_extract_all(scrap, '<p class="row">.*?</p>')[[1]]#
+   pic.str   <- str_extract(adds, 'id="images:.*?jpg"')#
+#
+   pic.base  <- str_replace(pic.str, 'id="images:(.*jpg)"', "\\1")#
+#
+   pic.url   <- paste("http://images.craigslist.org/", pic.base, sep = "")#
+#
+   pic.tags  <- paste('<img src="', pic.url, '" alt="', pic.url, '" ',#
+#
+                      'style="width:100%"/>', sep = "")#
+#
+   adds      <- paste(pic.tags, '<BR>', adds)#
+#
+   add.mat   <- suppressWarnings(matrix(adds, ncol = ncol, byrow = TRUE))#
+   html <- HTMLInitFile()#
+#
+   HTML(add.mat, innerBorder = 1, file = html)#
+#
+   HTMLEndFile(html)#
+#
+   browseURL(paste("file://", html, sep = ""))#
+#
+}#
+#
+search.craigslist <- function(site.url = "http://atlanta.craigslist.org",#
+#
+                              ncol     = 3L) {#
+## This function prompts the user with questions for searching Craigslist#
+#
+## (search items, price, etc.) and displays the search results into an image#
+#
+## gallery.#
+#
+###
+#
+## Inputs:#
+#
+##    - site.url: Craigslist site URL#
+#
+##    - ncol:     the number of columns for the output image gallery#
+#
+###
+#
+## Output: none. As a side effect, a browser is opened.#
+   query      <- readline("search Craigslist for: ")#
+#
+   category   <- .pick.category()#
+#
+   title.only <- readline("search titles only (press 1 or ENTER to skip): ")#
+#
+   min.price  <- readline("min price (press ENTER to skip): ")#
+#
+   max.price  <- readline("max price (press ENTER to skip): ")#
+#
+   pic.only   <- readline("pic only  (press 1 or ENTER to skip): ")#
+   title.only <- title.only == "1"#
+#
+   min.price  <- as.integer(min.price)#
+#
+   max.price  <- as.integer(max.price)#
+#
+   pic.only   <- pic.only == "1"#
+   url <- search.url(query      = query,#
+#
+                     site.url   = site.url,#
+#
+                     category   = category,#
+#
+                     title.only = title.only,#
+#
+                     min.price  = min.price,#
+#
+                     max.price  = max.price,#
+#
+                     pic.only   = pic.only)#
+   image.gallery(url, ncol = ncol)#
+#
+}#
+.pick.category <- function() {#
+## This function prompts a menu for selecting a search category and returns#
+#
+## the corresponding 3-letter code used by Craigslist#
+   categories <- read.table(textConnection("#
+    CODE = DESCRIPTION#
+    sss = all for sale / wanted#
+#
+    ata = antiques#
+#
+    ppa = appliances#
+#
+    ara = arts+crafts#
+#
+    pta = auto parts#
+#
+    baa = baby+kids#
+#
+    bar = barter#
+#
+    haa = beauty+health#
+#
+    bia = bikes#
+#
+    boo = boats#
+#
+    bka = books#
+#
+    bfa = business#
+#
+    cta = cars+trucks#
+#
+    ema = cd/dvd/vhs#
+#
+    moa = cell phones#
+#
+    cla = clothing+accessories#
+#
+    cba = collectibles#
+#
+    sya = computers#
+#
+    ela = electronics#
+#
+    gra = farm+garden#
+#
+    zip = free stuff#
+#
+    fua = furniture#
+#
+    gms = garage sales#
+#
+    foa = general for sale#
+#
+    hsa = household#
+#
+    wan = items wanted#
+#
+    jwa = jewelry#
+#
+    maa = materials#
+#
+    mca = motorcycles#
+#
+    msa = musical instruments#
+#
+    pha = photo+video#
+#
+    rva = recreational vehicles#
+#
+    sga = sporting goods#
+#
+    tia = tickets#
+#
+    tla = tools#
+#
+    taa = toys+games#
+#
+    vga = video gaming"), header = TRUE, sep = "=", strip.white = TRUE,#
+#
+                          stringsAsFactors = FALSE)#
+   selected.idx <- menu(categories$DESCRIPTION, title = "pick a category:")#
+   return(categories$CODE[selected.idx])#
+#
+}
+search.craigslist()
+install.packages("R2HTML")
+search.craigslist()
+search.url <- function(query,#
+#
+                       site.url   = "http://sfbay.craigslist.org",#
+#
+                       category   = "sss",#
+#
+                       title.only = TRUE,#
+#
+                       min.price  = integer(0),#
+#
+                       max.price  = integer(0),#
+#
+                       pic.only   = TRUE) {#
+## This function creates a search URL on Craigslist.#
+#
+###
+#
+## Inputs:#
+#
+##    - query:      search string#
+#
+##    - site.url:   Craigslist site URL#
+#
+##    - category:   a three-letter code for the category; some examples#
+#
+##                   "sss": all for sale/wanted, "zip": free stuff#
+#
+##    - title.only: boolean for restricting the search to add titles#
+#
+##    - min.price   minimum price#
+#
+##    - max.price:  maximum price#
+#
+##    - pic.only:   boolean for restricting the search to adds with pics#
+#
+###
+#
+## Output: a string representing a Craigslist search URL#
+   search <- list(query    = gsub(" ", "+", query),#
+#
+                  catAbb   = category,#
+#
+                  srchType = ifelse(title.only, "T", "A"),#
+#
+                  minAsk   = as.integer(min.price),#
+#
+                  maxAsk   = as.integer(max.price),#
+#
+                  hasPic   = as.numeric(pic.only))#
+   valid <- sapply(search, length) > 0L#
+   search.str  <- paste(names(search)[valid], search[valid],#
+#
+                        sep = "=", collapse = "&")#
+#
+   search.url  <- paste(site.url, "/search/sss?", search.str, sep = "")#
+   return(search.url)#
+#
+}
+url <- search.url("Toyota Prius")
+url
+getURL(url)
+?getURL
+url.exists("http://sfbay.craigslist.org/search/sss?query=Toyota+Prius&catAbb=sss&srchType=T&hasPic=1")
+scrap = getURL("http://sfbay.craigslist.org/search/sss?query=Toyota+Prius&catAbb=sss&srchType=T&hasPic=1")
+names(scrap)
+nchar(scrap)
+uris = c("http://www.omegahat.org/RCurl/index.html", "http://www.omegahat.org/RCurl/philosophy.xml")
+uris
+txt = getIRI(uris)
+txt = getURI(uris)
+txt
+scrap = getURI("http://sfbay.craigslist.org/search/sss?query=Toyota+Prius&catAbb=sss&srchType=T&hasPic=1")
+scrap
+scrap = getURLContent("http://sfbay.craigslist.org/search/sss?query=Toyota+Prius&catAbb=sss&srchType=T&hasPic=1")
+scrap
+scrao=getURL("http://sfbay.craigslist.org/search/sss?hasPic=1&query=Toyota%20Prius&srchType=T")
+scrao
+"http://sfbay.craigslist.org/search/sss?hasPic=1&query=Toyota%20Prius&srchType=T"
+url
+require(SuperLearner)
+?snowSuperLearner
+generateData = function(n, time.pt, abar=NULL) {#
+#
+	#Time ordering: W, Y(t), L(t), A(t) : W=(W1,W2) and L(t) = (L2(t),L1(t))#
+	#n.b. Within L(t) there is no implied time-ordering...i.e. either of L2(t) or L1(t) can go first#
+	rexpit  = function(x) rbinom(n=length(x), size=1, prob=x)#
+	QW1     = function(n) rnorm(n, mean=0, sd=1)#
+	QW2     = function(n) rep(plogis(-1), n)#
+	QW3     = function(n) rnorm(n, mean=0, sd=1)#
+	QY.t    = function(prev_y, w1, w2, w3, prev_l1, prev_l2, prev_a) ifelse(prev_y==1, 1, plogis(-1.9 + 1.2*w1 - 2.4*w2 - 1.8*prev_l1 - 1.6*prev_l2 + 1*prev_l1*prev_l2 - 1*prev_a))#
+	QL1.t   = function(y, w1, prev_l1, prev_l2, prev_a) ifelse(y==1, prev_l1, 0.1 + 0.4*w1 + 0.6*prev_l1 - 0.7*prev_l2 - 0.45*prev_a - rnorm(length(w1), sd=0.5))#
+	QL2.t   = function(y, w1, w2, prev_l1, prev_l2, prev_a) ifelse(y==1, prev_l2, -0.55 + 0.5*w1 + 0.75*w2 + 0.1*prev_l1 + 0.3*prev_l2 - 0.75*prev_a - rnorm(length(w1), sd=0.5))#
+	gA.t    = function(y, w1, w2, l1, l2, prev_a) ifelse(y==1, prev_a, ifelse(prev_a==1, 1, plogis(-1 - 1.5*w1 + 1.75*w2 + 1.2*l1 - 1.8*l2 + 0.8*l1*l2)))#
+	# nb. Distribution is set up such that: #
+	#	Y(0)=0 for everyone, ie. Everyone is alive at the beginning of follow-up#
+	#	if Y(t)=1, then all remaining covariate last values get carried forward#
+	#	if A(t-1)=1 then A(t)=1 #
+	g.matrix = matrix(ncol=time.pt, nrow=n, dimnames=list(NULL, paste0("A.", 0:(time.pt-1))))#
+	## CHECKS ###
+	if(time.pt==0) stop("time.pt has to be greater than 0")#
+	if(any(cummax(abar)!=abar)) stop("A is a counting process & cannot decrease")#
+	if(!is.null(abar) & length(abar) != time.pt) stop("abar has to be either NULL or length of time.pt")#
+#
+	## INITIALIZATION ###
+	o.names = NULL#
+	for(i in 0:time.pt){#
+		if(i<time.pt) {#
+			o.names = c(o.names, paste0(c("Y", "L1","L2", "A"), ".", i))#
+		} else {#
+			o.names = c(o.names, paste0(c("Y"), ".", i))#
+		}	#
+	}#
+	O = matrix(nrow=n, ncol=length(o.names)+3, dimnames=list(NULL, c("W1", "W2", "W3", o.names)))#
+	## OBSERVED VALUES ###
+	O[,"W1"] = QW1(n)#
+	O[,"W2"] = rexpit(QW2(n))#
+	O[,"W3"] = QW3(n)#
+	for(i in 0:time.pt){#
+		#nb. "prev" values are set to 0 for t=0#
+		if(i==0) {#
+			#Y(t)#
+			O[,"Y.0"] = rep(0,n)#
+			#L1(t)#
+			O[,"L1.0"] = QL1.t(y=O[,"Y.0"], w1=O[,"W1"], prev_l1=rep(0, n), prev_l2=rep(0, n), prev_a=rep(0, n))#
+			#L2(t)#
+			O[,"L2.0"] = QL2.t(y=O[,"Y.0"], w1=O[,"W1"], w2=O[,"W2"], prev_l1=rep(0, n), prev_l2=rep(0, n), prev_a=rep(0, n))#
+			#A(t)#
+			if(is.null(abar)) {#
+				g.matrix[,"A.0"] = gA.t(y=O[,"Y.0"], w1=O[,"W1"], w2=O[,"W2"], l1=O[,"L1.0"], l2=O[,"L2.0"], prev_a=rep(0, n))#
+				O[,"A.0"] = rexpit(g.matrix[,"A.0"])#
+			} else {#
+				g.matrix[,"A.0"] = gA.t(y=O[,"Y.0"], w1=O[,"W1"], w2=O[,"W2"], l1=O[,"L1.0"], l2=O[,"L2.0"], prev_a=rep(0, n))#
+				O[,"A.0"] = rep(abar[i+1], n)#
+			}#
+		} else if (i<time.pt) {#
+			#Y(t)#
+			O[,paste0("Y.",i)] = rexpit(QY.t(prev_y=O[,paste0("Y.",i-1)], w1=O[,"W1"], w2=O[,"W2"], w3=O[,"W3"], prev_l1=O[,paste0("L1.",i-1)], prev_l2=O[,paste0("L2.",i-1)], prev_a=O[,paste0("A.",i-1)]))#
+			#L1(t)#
+			O[,paste0("L1.",i)] = QL1.t(y=O[,paste0("Y.",i)], w1=O[,"W1"], prev_l1=O[,paste0("L1.",i-1)], prev_l2=O[,paste0("L2.",i-1)], prev_a=O[,paste0("A.",i-1)])#
+			#L2(t)#
+			O[,paste0("L2.",i)] = QL2.t(y=O[,paste0("Y.",i)], w1=O[,"W1"], w2=O[,"W2"], prev_l1=O[,paste0("L1.",i-1)], prev_l2=O[,paste0("L2.",i-1)], prev_a=O[,paste0("A.",i-1)])#
+			#A(t)#
+			if(is.null(abar)) {#
+				g.matrix[,paste0("A.",i)] = gA.t(y=O[,paste0("Y.",i)], w1=O[,"W1"], w2=O[,"W2"], l1=O[,paste0("L1.",i)], l2=O[,paste0("L2.",i)], prev_a=O[,paste0("A.",i-1)])#
+				O[,paste0("A.",i)] = rexpit(g.matrix[,paste0("A.",i)])#
+			} else {#
+				g.matrix[,paste0("A.",i)] = gA.t(y=O[,paste0("Y.",i)], w1=O[,"W1"], w2=O[,"W2"], l1=O[,paste0("L1.",i)], l2=O[,paste0("L2.",i)], prev_a=O[,paste0("A.",i-1)])#
+				O[,paste0("A.",i)] = rep(abar[i+1], n)#
+				O[O[,paste0("Y.",i)]==1,paste0("A.",i)] = O[O[,paste0("Y.",i)]==1,paste0("A.",i-1)]#
+			}#
+		} else if (i==time.pt) {#
+			#Y(t)#
+			O[,paste0("Y.",i)] = rexpit(QY.t(prev_y=O[,paste0("Y.",i-1)], w1=O[,"W1"], w2=O[,"W2"], w3=O[,"W3"], prev_l1=O[,paste0("L1.",i-1)], prev_l2=O[,paste0("L2.",i-1)], prev_a=O[,paste0("A.",i-1)]))#
+		}#
+	}#
+	O = data.frame(O)#
+	O$Y.0 = NULL#
+	return(list(O=O, g.matrix=g.matrix))#
+}#
+#
+time.pt = 3#
+SL.library = NULL#
+if(time.pt>1) {#
+	Lnodes = paste(rep(c("L1.","L2."), times=(time.pt-1)), rep(1:(time.pt-1), each=2), sep="")#
+} else {#
+	Lnodes = NULL#
+}#
+Ynodes = paste("Y.", 1:time.pt, sep="")#
+Anodes = paste("A.", 1:time.pt-1, sep="")#
+gform.true = Qform.true = NULL#
+gform.mis = Qform.mis = NULL#
+gform.uadj = Qform.uadj = NULL#
+for(i in 1:time.pt) {#
+	## TRUE MODELS ###
+	gform.true = c(gform.true, paste("A.", i-1, " ~ W1 + W2", paste(" + L1.", i-1, sep=""), paste(" + L2.", i-1, sep=""), paste(" + L1.", i-1, ":L2.", i-1, sep=""), sep=""))#
+	Qform.true = c(Qform.true, paste("Q.kplus1 ~ W1 + W2", paste(" + L1.", i-1, sep=""), paste(" + L2.", i-1, sep=""), paste(" + L1.", i-1, ":L2.", i-1, sep=""), paste(" + A.", i-1, sep=""), sep=""))#
+	names(Qform.true)[length(Qform.true)] = paste("Y.", i, sep="")#
+}#
+#
+O = generateData(n=n, time.pt=time.pt)$O#
+ltmle.fit.true = suppressMessages(ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, abar=list(abar1=rep(1,time.pt), abar0=rep(0,time.pt)), survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, deterministic.g.function=MaintainTreatment, gbounds=c(0.001,1), estimate.time=FALSE, IC.variance.only=FALSE))#
+ltmle.fit_0.true = suppressMessages(ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, abar=rep(0,time.pt), survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, deterministic.g.function=MaintainTreatment, gbounds=c(0.001,1), estimate.time=FALSE, IC.variance.only=FALSE))#
+ltmle.fit_1.true = suppressMessages(ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, abar=rep(1,time.pt), survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, deterministic.g.function=MaintainTreatment, gbounds=c(0.001,1), estimate.time=FALSE, IC.variance.only=FALSE))#
+#
+summary(ltmle.fit.true$IC)#
+summary(ltmle.fit_0.true$IC$tmle)#
+summary(ltmle.fit_1.true$IC$tmle)
+require(ltmle)
+generateData = function(n, time.pt, abar=NULL) {#
+#
+	#Time ordering: W, Y(t), L(t), A(t) : W=(W1,W2) and L(t) = (L2(t),L1(t))#
+	#n.b. Within L(t) there is no implied time-ordering...i.e. either of L2(t) or L1(t) can go first#
+	rexpit  = function(x) rbinom(n=length(x), size=1, prob=x)#
+	QW1     = function(n) rnorm(n, mean=0, sd=1)#
+	QW2     = function(n) rep(plogis(-1), n)#
+	QW3     = function(n) rnorm(n, mean=0, sd=1)#
+	QY.t    = function(prev_y, w1, w2, w3, prev_l1, prev_l2, prev_a) ifelse(prev_y==1, 1, plogis(-1.9 + 1.2*w1 - 2.4*w2 - 1.8*prev_l1 - 1.6*prev_l2 + 1*prev_l1*prev_l2 - 1*prev_a))#
+	QL1.t   = function(y, w1, prev_l1, prev_l2, prev_a) ifelse(y==1, prev_l1, 0.1 + 0.4*w1 + 0.6*prev_l1 - 0.7*prev_l2 - 0.45*prev_a - rnorm(length(w1), sd=0.5))#
+	QL2.t   = function(y, w1, w2, prev_l1, prev_l2, prev_a) ifelse(y==1, prev_l2, -0.55 + 0.5*w1 + 0.75*w2 + 0.1*prev_l1 + 0.3*prev_l2 - 0.75*prev_a - rnorm(length(w1), sd=0.5))#
+	gA.t    = function(y, w1, w2, l1, l2, prev_a) ifelse(y==1, prev_a, ifelse(prev_a==1, 1, plogis(-1 - 1.5*w1 + 1.75*w2 + 1.2*l1 - 1.8*l2 + 0.8*l1*l2)))#
+	# nb. Distribution is set up such that: #
+	#	Y(0)=0 for everyone, ie. Everyone is alive at the beginning of follow-up#
+	#	if Y(t)=1, then all remaining covariate last values get carried forward#
+	#	if A(t-1)=1 then A(t)=1 #
+	g.matrix = matrix(ncol=time.pt, nrow=n, dimnames=list(NULL, paste0("A.", 0:(time.pt-1))))#
+	## CHECKS ###
+	if(time.pt==0) stop("time.pt has to be greater than 0")#
+	if(any(cummax(abar)!=abar)) stop("A is a counting process & cannot decrease")#
+	if(!is.null(abar) & length(abar) != time.pt) stop("abar has to be either NULL or length of time.pt")#
+#
+	## INITIALIZATION ###
+	o.names = NULL#
+	for(i in 0:time.pt){#
+		if(i<time.pt) {#
+			o.names = c(o.names, paste0(c("Y", "L1","L2", "A"), ".", i))#
+		} else {#
+			o.names = c(o.names, paste0(c("Y"), ".", i))#
+		}	#
+	}#
+	O = matrix(nrow=n, ncol=length(o.names)+3, dimnames=list(NULL, c("W1", "W2", "W3", o.names)))#
+	## OBSERVED VALUES ###
+	O[,"W1"] = QW1(n)#
+	O[,"W2"] = rexpit(QW2(n))#
+	O[,"W3"] = QW3(n)#
+	for(i in 0:time.pt){#
+		#nb. "prev" values are set to 0 for t=0#
+		if(i==0) {#
+			#Y(t)#
+			O[,"Y.0"] = rep(0,n)#
+			#L1(t)#
+			O[,"L1.0"] = QL1.t(y=O[,"Y.0"], w1=O[,"W1"], prev_l1=rep(0, n), prev_l2=rep(0, n), prev_a=rep(0, n))#
+			#L2(t)#
+			O[,"L2.0"] = QL2.t(y=O[,"Y.0"], w1=O[,"W1"], w2=O[,"W2"], prev_l1=rep(0, n), prev_l2=rep(0, n), prev_a=rep(0, n))#
+			#A(t)#
+			if(is.null(abar)) {#
+				g.matrix[,"A.0"] = gA.t(y=O[,"Y.0"], w1=O[,"W1"], w2=O[,"W2"], l1=O[,"L1.0"], l2=O[,"L2.0"], prev_a=rep(0, n))#
+				O[,"A.0"] = rexpit(g.matrix[,"A.0"])#
+			} else {#
+				g.matrix[,"A.0"] = gA.t(y=O[,"Y.0"], w1=O[,"W1"], w2=O[,"W2"], l1=O[,"L1.0"], l2=O[,"L2.0"], prev_a=rep(0, n))#
+				O[,"A.0"] = rep(abar[i+1], n)#
+			}#
+		} else if (i<time.pt) {#
+			#Y(t)#
+			O[,paste0("Y.",i)] = rexpit(QY.t(prev_y=O[,paste0("Y.",i-1)], w1=O[,"W1"], w2=O[,"W2"], w3=O[,"W3"], prev_l1=O[,paste0("L1.",i-1)], prev_l2=O[,paste0("L2.",i-1)], prev_a=O[,paste0("A.",i-1)]))#
+			#L1(t)#
+			O[,paste0("L1.",i)] = QL1.t(y=O[,paste0("Y.",i)], w1=O[,"W1"], prev_l1=O[,paste0("L1.",i-1)], prev_l2=O[,paste0("L2.",i-1)], prev_a=O[,paste0("A.",i-1)])#
+			#L2(t)#
+			O[,paste0("L2.",i)] = QL2.t(y=O[,paste0("Y.",i)], w1=O[,"W1"], w2=O[,"W2"], prev_l1=O[,paste0("L1.",i-1)], prev_l2=O[,paste0("L2.",i-1)], prev_a=O[,paste0("A.",i-1)])#
+			#A(t)#
+			if(is.null(abar)) {#
+				g.matrix[,paste0("A.",i)] = gA.t(y=O[,paste0("Y.",i)], w1=O[,"W1"], w2=O[,"W2"], l1=O[,paste0("L1.",i)], l2=O[,paste0("L2.",i)], prev_a=O[,paste0("A.",i-1)])#
+				O[,paste0("A.",i)] = rexpit(g.matrix[,paste0("A.",i)])#
+			} else {#
+				g.matrix[,paste0("A.",i)] = gA.t(y=O[,paste0("Y.",i)], w1=O[,"W1"], w2=O[,"W2"], l1=O[,paste0("L1.",i)], l2=O[,paste0("L2.",i)], prev_a=O[,paste0("A.",i-1)])#
+				O[,paste0("A.",i)] = rep(abar[i+1], n)#
+				O[O[,paste0("Y.",i)]==1,paste0("A.",i)] = O[O[,paste0("Y.",i)]==1,paste0("A.",i-1)]#
+			}#
+		} else if (i==time.pt) {#
+			#Y(t)#
+			O[,paste0("Y.",i)] = rexpit(QY.t(prev_y=O[,paste0("Y.",i-1)], w1=O[,"W1"], w2=O[,"W2"], w3=O[,"W3"], prev_l1=O[,paste0("L1.",i-1)], prev_l2=O[,paste0("L2.",i-1)], prev_a=O[,paste0("A.",i-1)]))#
+		}#
+	}#
+	O = data.frame(O)#
+	O$Y.0 = NULL#
+	return(list(O=O, g.matrix=g.matrix))#
+}#
+#
+time.pt = 3#
+SL.library = NULL#
+if(time.pt>1) {#
+	Lnodes = paste(rep(c("L1.","L2."), times=(time.pt-1)), rep(1:(time.pt-1), each=2), sep="")#
+} else {#
+	Lnodes = NULL#
+}#
+Ynodes = paste("Y.", 1:time.pt, sep="")#
+Anodes = paste("A.", 1:time.pt-1, sep="")#
+gform.true = Qform.true = NULL#
+gform.mis = Qform.mis = NULL#
+gform.uadj = Qform.uadj = NULL#
+for(i in 1:time.pt) {#
+	## TRUE MODELS ###
+	gform.true = c(gform.true, paste("A.", i-1, " ~ W1 + W2", paste(" + L1.", i-1, sep=""), paste(" + L2.", i-1, sep=""), paste(" + L1.", i-1, ":L2.", i-1, sep=""), sep=""))#
+	Qform.true = c(Qform.true, paste("Q.kplus1 ~ W1 + W2", paste(" + L1.", i-1, sep=""), paste(" + L2.", i-1, sep=""), paste(" + L1.", i-1, ":L2.", i-1, sep=""), paste(" + A.", i-1, sep=""), sep=""))#
+	names(Qform.true)[length(Qform.true)] = paste("Y.", i, sep="")#
+}#
+#
+O = generateData(n=n, time.pt=time.pt)$O#
+ltmle.fit.true = suppressMessages(ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, abar=list(abar1=rep(1,time.pt), abar0=rep(0,time.pt)), survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, deterministic.g.function=MaintainTreatment, gbounds=c(0.001,1), estimate.time=FALSE, IC.variance.only=FALSE))#
+ltmle.fit_0.true = suppressMessages(ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, abar=rep(0,time.pt), survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, deterministic.g.function=MaintainTreatment, gbounds=c(0.001,1), estimate.time=FALSE, IC.variance.only=FALSE))#
+ltmle.fit_1.true = suppressMessages(ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, abar=rep(1,time.pt), survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, deterministic.g.function=MaintainTreatment, gbounds=c(0.001,1), estimate.time=FALSE, IC.variance.only=FALSE))#
+#
+summary(ltmle.fit.true$IC)#
+summary(ltmle.fit_0.true$IC$tmle)#
+summary(ltmle.fit_1.true$IC$tmle)
+n=500
+generateData = function(n, time.pt, abar=NULL) {#
+#
+	#Time ordering: W, Y(t), L(t), A(t) : W=(W1,W2) and L(t) = (L2(t),L1(t))#
+	#n.b. Within L(t) there is no implied time-ordering...i.e. either of L2(t) or L1(t) can go first#
+	rexpit  = function(x) rbinom(n=length(x), size=1, prob=x)#
+	QW1     = function(n) rnorm(n, mean=0, sd=1)#
+	QW2     = function(n) rep(plogis(-1), n)#
+	QW3     = function(n) rnorm(n, mean=0, sd=1)#
+	QY.t    = function(prev_y, w1, w2, w3, prev_l1, prev_l2, prev_a) ifelse(prev_y==1, 1, plogis(-1.9 + 1.2*w1 - 2.4*w2 - 1.8*prev_l1 - 1.6*prev_l2 + 1*prev_l1*prev_l2 - 1*prev_a))#
+	QL1.t   = function(y, w1, prev_l1, prev_l2, prev_a) ifelse(y==1, prev_l1, 0.1 + 0.4*w1 + 0.6*prev_l1 - 0.7*prev_l2 - 0.45*prev_a - rnorm(length(w1), sd=0.5))#
+	QL2.t   = function(y, w1, w2, prev_l1, prev_l2, prev_a) ifelse(y==1, prev_l2, -0.55 + 0.5*w1 + 0.75*w2 + 0.1*prev_l1 + 0.3*prev_l2 - 0.75*prev_a - rnorm(length(w1), sd=0.5))#
+	gA.t    = function(y, w1, w2, l1, l2, prev_a) ifelse(y==1, prev_a, ifelse(prev_a==1, 1, plogis(-1 - 1.5*w1 + 1.75*w2 + 1.2*l1 - 1.8*l2 + 0.8*l1*l2)))#
+	# nb. Distribution is set up such that: #
+	#	Y(0)=0 for everyone, ie. Everyone is alive at the beginning of follow-up#
+	#	if Y(t)=1, then all remaining covariate last values get carried forward#
+	#	if A(t-1)=1 then A(t)=1 #
+	g.matrix = matrix(ncol=time.pt, nrow=n, dimnames=list(NULL, paste0("A.", 0:(time.pt-1))))#
+	## CHECKS ###
+	if(time.pt==0) stop("time.pt has to be greater than 0")#
+	if(any(cummax(abar)!=abar)) stop("A is a counting process & cannot decrease")#
+	if(!is.null(abar) & length(abar) != time.pt) stop("abar has to be either NULL or length of time.pt")#
+#
+	## INITIALIZATION ###
+	o.names = NULL#
+	for(i in 0:time.pt){#
+		if(i<time.pt) {#
+			o.names = c(o.names, paste0(c("Y", "L1","L2", "A"), ".", i))#
+		} else {#
+			o.names = c(o.names, paste0(c("Y"), ".", i))#
+		}	#
+	}#
+	O = matrix(nrow=n, ncol=length(o.names)+3, dimnames=list(NULL, c("W1", "W2", "W3", o.names)))#
+	## OBSERVED VALUES ###
+	O[,"W1"] = QW1(n)#
+	O[,"W2"] = rexpit(QW2(n))#
+	O[,"W3"] = QW3(n)#
+	for(i in 0:time.pt){#
+		#nb. "prev" values are set to 0 for t=0#
+		if(i==0) {#
+			#Y(t)#
+			O[,"Y.0"] = rep(0,n)#
+			#L1(t)#
+			O[,"L1.0"] = QL1.t(y=O[,"Y.0"], w1=O[,"W1"], prev_l1=rep(0, n), prev_l2=rep(0, n), prev_a=rep(0, n))#
+			#L2(t)#
+			O[,"L2.0"] = QL2.t(y=O[,"Y.0"], w1=O[,"W1"], w2=O[,"W2"], prev_l1=rep(0, n), prev_l2=rep(0, n), prev_a=rep(0, n))#
+			#A(t)#
+			if(is.null(abar)) {#
+				g.matrix[,"A.0"] = gA.t(y=O[,"Y.0"], w1=O[,"W1"], w2=O[,"W2"], l1=O[,"L1.0"], l2=O[,"L2.0"], prev_a=rep(0, n))#
+				O[,"A.0"] = rexpit(g.matrix[,"A.0"])#
+			} else {#
+				g.matrix[,"A.0"] = gA.t(y=O[,"Y.0"], w1=O[,"W1"], w2=O[,"W2"], l1=O[,"L1.0"], l2=O[,"L2.0"], prev_a=rep(0, n))#
+				O[,"A.0"] = rep(abar[i+1], n)#
+			}#
+		} else if (i<time.pt) {#
+			#Y(t)#
+			O[,paste0("Y.",i)] = rexpit(QY.t(prev_y=O[,paste0("Y.",i-1)], w1=O[,"W1"], w2=O[,"W2"], w3=O[,"W3"], prev_l1=O[,paste0("L1.",i-1)], prev_l2=O[,paste0("L2.",i-1)], prev_a=O[,paste0("A.",i-1)]))#
+			#L1(t)#
+			O[,paste0("L1.",i)] = QL1.t(y=O[,paste0("Y.",i)], w1=O[,"W1"], prev_l1=O[,paste0("L1.",i-1)], prev_l2=O[,paste0("L2.",i-1)], prev_a=O[,paste0("A.",i-1)])#
+			#L2(t)#
+			O[,paste0("L2.",i)] = QL2.t(y=O[,paste0("Y.",i)], w1=O[,"W1"], w2=O[,"W2"], prev_l1=O[,paste0("L1.",i-1)], prev_l2=O[,paste0("L2.",i-1)], prev_a=O[,paste0("A.",i-1)])#
+			#A(t)#
+			if(is.null(abar)) {#
+				g.matrix[,paste0("A.",i)] = gA.t(y=O[,paste0("Y.",i)], w1=O[,"W1"], w2=O[,"W2"], l1=O[,paste0("L1.",i)], l2=O[,paste0("L2.",i)], prev_a=O[,paste0("A.",i-1)])#
+				O[,paste0("A.",i)] = rexpit(g.matrix[,paste0("A.",i)])#
+			} else {#
+				g.matrix[,paste0("A.",i)] = gA.t(y=O[,paste0("Y.",i)], w1=O[,"W1"], w2=O[,"W2"], l1=O[,paste0("L1.",i)], l2=O[,paste0("L2.",i)], prev_a=O[,paste0("A.",i-1)])#
+				O[,paste0("A.",i)] = rep(abar[i+1], n)#
+				O[O[,paste0("Y.",i)]==1,paste0("A.",i)] = O[O[,paste0("Y.",i)]==1,paste0("A.",i-1)]#
+			}#
+		} else if (i==time.pt) {#
+			#Y(t)#
+			O[,paste0("Y.",i)] = rexpit(QY.t(prev_y=O[,paste0("Y.",i-1)], w1=O[,"W1"], w2=O[,"W2"], w3=O[,"W3"], prev_l1=O[,paste0("L1.",i-1)], prev_l2=O[,paste0("L2.",i-1)], prev_a=O[,paste0("A.",i-1)]))#
+		}#
+	}#
+	O = data.frame(O)#
+	O$Y.0 = NULL#
+	return(list(O=O, g.matrix=g.matrix))#
+}#
+#
+time.pt = 3#
+SL.library = NULL#
+if(time.pt>1) {#
+	Lnodes = paste(rep(c("L1.","L2."), times=(time.pt-1)), rep(1:(time.pt-1), each=2), sep="")#
+} else {#
+	Lnodes = NULL#
+}#
+Ynodes = paste("Y.", 1:time.pt, sep="")#
+Anodes = paste("A.", 1:time.pt-1, sep="")#
+gform.true = Qform.true = NULL#
+gform.mis = Qform.mis = NULL#
+gform.uadj = Qform.uadj = NULL#
+for(i in 1:time.pt) {#
+	## TRUE MODELS ###
+	gform.true = c(gform.true, paste("A.", i-1, " ~ W1 + W2", paste(" + L1.", i-1, sep=""), paste(" + L2.", i-1, sep=""), paste(" + L1.", i-1, ":L2.", i-1, sep=""), sep=""))#
+	Qform.true = c(Qform.true, paste("Q.kplus1 ~ W1 + W2", paste(" + L1.", i-1, sep=""), paste(" + L2.", i-1, sep=""), paste(" + L1.", i-1, ":L2.", i-1, sep=""), paste(" + A.", i-1, sep=""), sep=""))#
+	names(Qform.true)[length(Qform.true)] = paste("Y.", i, sep="")#
+}#
+#
+O = generateData(n=n, time.pt=time.pt)$O#
+ltmle.fit.true = suppressMessages(ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, abar=list(abar1=rep(1,time.pt), abar0=rep(0,time.pt)), survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, deterministic.g.function=MaintainTreatment, gbounds=c(0.001,1), estimate.time=FALSE, IC.variance.only=FALSE))#
+ltmle.fit_0.true = suppressMessages(ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, abar=rep(0,time.pt), survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, deterministic.g.function=MaintainTreatment, gbounds=c(0.001,1), estimate.time=FALSE, IC.variance.only=FALSE))#
+ltmle.fit_1.true = suppressMessages(ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, abar=rep(1,time.pt), survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, deterministic.g.function=MaintainTreatment, gbounds=c(0.001,1), estimate.time=FALSE, IC.variance.only=FALSE))#
+#
+summary(ltmle.fit.true$IC)#
+summary(ltmle.fit_0.true$IC$tmle)#
+summary(ltmle.fit_1.true$IC$tmle)
+summary(ltmle.fit.true)$effect.measures$ATE
+var(ltmle.fit.true$IC[,1])+var(ltmle.fit.true$IC[,2])-2*cov(ltmle.fit.true$IC[,1],ltmle.fit.true$IC[,2])
+ate.var = var(ltmle.fit.true$IC[,1])+var(ltmle.fit.true$IC[,2])-2*cov(ltmle.fit.true$IC[,1],ltmle.fit.true$IC[,2])
+sqrt(ate.var/n)
+summary(ltmle.fit.true)$effect.measures$ATE#
+(ate.std.dev = sqrt(var(ltmle.fit.true$IC[,1]-ltmle.fit.true$IC[,2])/n))
+(ate.std.dev = sqrt(var(ltmle.fit_1.true$IC$tmle-ltmle.fit_0.true$IC$tmle)/n))
+ltmle.fit_1.true$est - ltmle.fit_0.true$est
+ltmle.fit.true = suppressMessages(ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, abar=list(abar1=rep(1,time.pt), abar0=rep(0,time.pt)), survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, deterministic.g.function=MaintainTreatment, gbounds=c(0.001,1), estimate.time=FALSE, IC.variance.only=TRUE))#
+ltmle.fit_0.true = suppressMessages(ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, abar=rep(0,time.pt), survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, deterministic.g.function=MaintainTreatment, gbounds=c(0.001,1), estimate.time=FALSE, IC.variance.only=TRUE))#
+ltmle.fit_1.true = suppressMessages(ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, abar=rep(1,time.pt), survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, deterministic.g.function=MaintainTreatment, gbounds=c(0.001,1), estimate.time=FALSE, IC.variance.only=TRUE))#
+#
+summary(ltmle.fit.true$IC)#
+summary(ltmle.fit_1.true$IC$tmle)#
+summary(ltmle.fit_0.true$IC$tmle)
+summary(ltmle.fit.true)$effect.measures$ATE#
+(ate.std.dev = sqrt(var(ltmle.fit.true$IC[,1]-ltmle.fit.true$IC[,2])/n))#
+(ate.std.dev = sqrt(var(ltmle.fit_1.true$IC$tmle-ltmle.fit_0.true$IC$tmle)/n))
+list(2:ncol(densityData))
+list(2:10)
+require(reshape)
+?reshape
+betas_pos=seq(-2,1,.05)#
+betas_ate=seq(0,1,.02)#
+betas = expand.grid(beta_pos=betas_pos, beta_ate=betas_ate)
+head(betas)
+which(betas$beta_ate==0)
+betas_pos=seq(-2,0,.2)
+length(betas_pos)
+betas_pos=seq(-2,1,.2)
+length(betas_pos)
+betas_pos=seq(-2,0,.2)
+length(betas_pos)
+betas_pos=seq(-2,1,.2)
+length(betas_pos)
+require(RODBC)
+install.packages("RODBC")
+"I \"love\" this"
+c("I \"love\" this")
+paste("I \"love\" this")
+install.packages(”ROpenCL”, repos = ”http://repos.openanalytics.eu”, type = ”source”)
+install.packages("ROpenCL", repos = "http://repos.openanalytics.eu", type = "source")
+install.packages("logging")
+install.packages("ROpenCL", repos = "http://repos.openanalytics.eu", type = "source")
+library(ROpenCL)
+a <- seq(11444777)/10#
+b <- seq(11444777)#
+out <- rep(0, length(a)) localWorkSize = 256 globalWorkSize =#
+ceiling(length(a)/localWorkSize)*localWorkSize
+out <- rep(0, length(a)) #
+localWorkSize = 256 #
+globalWorkSize = ceiling(length(a)/localWorkSize)*localWorkSize
+platformIDs <- getPlatformIDs()#
+#Get the devices#
+deviceIDs <- getDeviceIDs(platformIDs[[1]])#
+#Create the context#
+context <- createContext(deviceIDs[[1]])
+queue <- createCommandQueue(context,deviceIDs[[1]]) #
+#Allocate the OpenCL buffer memory objects for source and result on the device GMEM #
+inputBuf1 <- createBuffer(context, "CL_MEM_READ_ONLY", globalWorkSize, a) #
+inputBuf2 <- createBuffer(context, "CL_MEM_READ_ONLY", globalWorkSize, b) #
+outputBuf1 <- createBufferFloatVector(context, "CL_MEM_WRITE_ONLY", globalWorkSize)
+kernel <- "__kernel void VectorAdd(__global const float* a, __global const int* b,#
+__global float* c, int iNumElements)#
+{#
+// get index into global data array#
+int iGID = get_global_id(0);#
+// bound check (equivalent to the limit on a //'for' loop for standard/serial C code#
+if (iGID >= iNumElements)#
+{#
+return; }#
+// add the vector elements#
+c[iGID] = a[iGID] + b[iGID]; }"#
+kernel <- createProgram(context, kernel, "VectorAdd", inputBuf1, inputBuf2, outputBuf1, length(out))
+enqueueWriteBuffer(queue, inputBuf1, globalWorkSize, a)
+enqueueWriteBuffer(queue, inputBuf2, globalWorkSize, b)
+enqueueNDRangeKernel(queue, kernel, globalWorkSize, localWorkSize)
+result <- enqueueReadBuffer(queue, outputBuf1, globalWorkSize, out)
+result
+platformIDs
+deviceIDs
+context
+queue
+?glm
+utils::data(anorexia, package = "MASS")
+head
+9anorexia
+head(anorexia)
+require(datasets)
+head(airquality)
+glm1 = glm(Ozone ~ Solar.R + Wind, data = airquality)#
+glm2 = glm(Ozone ~ Solar.R + Temp, data = airquality)
+glm1
+glm2
+with(airquality, sum(Ozone, na.rm=T))
+################################################################################
+# Description: This study looks at ways to estimate the TMLE variance #
+# #
+# Author: Linh Tran <tranlm@berkeley.edu>#
+# Title: New variance estimator#
+# Date: 2015-10-06#
+################################################################################
+#rm(list = ls())#
+#args <- commandArgs(trailingOnly = F)#
+#(eta <- as.numeric(sub("-", "", args[length(args)])))#
+eta = 1#
+##############
+## OPTIONS ###
+##############
+setwd("~/Dropbox/00-Studies/lrecVariance")#
+words = function(...) paste(substitute(list(...)))[-1]#
+gg_color_hue <- function(n) {#
+	hues = seq(15, 375, length=n+1)#
+	hcl(h=hues, l=65, c=100)[1:n]#
+}#
+##############
+## LIBRARY ###
+##############
+load.packages = words(foreach, iterators, parallel, doSNOW, doMPI, Rmpi, rlecuyer, SuperLearner, polspline, e1071, magrittr, reshape, ggplot2, grid, boot, e1071, polspline, nnet, glmnet, arm, MASS, lme4, Rcpp)#
+tmp = unlist(lapply(load.packages, require, character.only=T))#
+cat(sum(tmp), "of", length(tmp), "packages successfully loaded.\n")#
+#library(xlsx)	# Needs a Java Runtime Environment#
+#detach(package:lrecVariance)#
+#devtools::document("~/Dropbox/00-Studies/lrecVariance")#
+#devtools::install("~/Dropbox/00-Studies/lrecVariance")#
+devtools::load_all("~/Dropbox/00-Studies/lrecVariance")#
+#devtools::load_all("~/Desktop/ltmle")#
+require(ltmle)#
+#detach(package:ltmle)#
+#devtools::load_all("~/Desktop/ltmle")#
+#
+##########################
+## SIMULATION SETTINGS ###
+##########################
+.ddir = "/Users/tranlm/Documents/datasets/LREC/LREC_UCB_2013_July/"#
+RNGkind("L'Ecuyer-CMRG")#
+ncores = detectCores()#
+cluster = "MPI"#
+options("mc.cores" = ncores, stringsAsFactors=FALSE, digits=4)#
+n = 500; n.sim = 500; n.true = 10000000#
+betas_pos=seq(-2,1,.05)#
+betas_ate=seq(0,1,.025)#
+#nb. delta_0 = .01 gives anti-conservative variance#
+delta_0 = 0#
+if(FALSE) {#
+	set.seed(1)#
+	bootIndicies = matrix(sample.int(n, size=1000*n, replace=TRUE), ncol=1000, nrow=n)#
+	save(bootIndicies, file="./inst/results/simResults/bootIndicies.Rda")#
+}
+time.pt = 1
+Lnodes = NULL; Ynodes = "Y.1"; Anodes = "A.0"#
+gform.true = "A.0 ~ W1 + W2 + L1.0 + L2.0 + L1.0:L2.0"#
+Qform.true = c(Y.1="Q.kplus1 ~ W1 + W2 + L1.0 + L2.0 + L1.0:L2.0 + A.0")
+set.seed(1)#
+results = vector("list", length(betas_pos))#
+#superman = makeCluster(ncores, type=cluster)#
+superman = startMPIcluster(count=ncores)#
+registerDoMPI(superman)#
+#clusterExport(cl = superman, ls())#
+exportDoMPI(cl = superman, ls())#
+cat("Cluster summary\n", getDoParRegistered(), "\n", getDoParName(), "\n", "\n", "\n")
+beta=1
+cat("beta:\t", sprintf("%.2f", betas_pos[beta]), "\n")#
+	#clusterExport(cl = superman, "beta")#
+	#clusterSetupRNG(superman, seed=rep(1,6))#
+	exportDoMPI(cl = superman, "beta")#
+	setRngDoMPI(cl = superman, seed=111111)#
+	estimates = foreach(i=1:n.sim, .combine="rbind", .packages=c("ltmle", "lrecVariance", "reshape", "boot")) %dopar% {#
+		O = generateData(n=n, time.pt=time.pt, beta_pos=betas_pos[beta], beta_ate=betas_ate[eta])$O#
+		O.a_0 = O.a_1 = O; O.a_0$A.0=0; O.a_1$A.0=1#
+		###################
+		## INITIAL Qbar ###
+		###################
+		Qbar.fit.true = glm(as.formula(Qform.true["Y.1"]), data=rename(O,c(Y.1="Q.kplus1")), family="binomial")#
+		Qbar.a_0 = predict(Qbar.fit.true, newdata=O.a_0, type="response")#
+		Qbar.a_1 = predict(Qbar.fit.true, newdata=O.a_1, type="response")#
+		#######################
+		## PACKAGE APPROACH ###
+		#######################
+		ltmle.fit_0 = ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, abar=rep(0,time.pt), gbounds=c(delta_0,1), SL.library=NULL, estimate.time=FALSE, stratify=FALSE, IC.variance.only=FALSE)#
+		ltmle.fit_1 = ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, abar=rep(1,time.pt), gbounds=c(delta_0,1), SL.library=NULL, estimate.time=FALSE, stratify=FALSE, IC.variance.only=FALSE)#
+		################
+		## BOOTSTRAP ###
+		################
+		boot.data = cbind(Q.kplus1=O$Y.1, O[,Anodes,drop=F], cum.g.a_0.1=ltmle.fit_0$cum.g, Qbar.a_0.Y.1=Qbar.a_0, cum.g.a_1.1=ltmle.fit_1$cum.g, Qbar.a_1.Y.1=Qbar.a_1)#
+		bootEsts = do.call("rbind", lapply(1:ncol(bootIndicies), function(i) psi.hat(time.pt, boot.data, bootIndicies[,i], aiptw=T)))#
+		bootVar = apply(bootEsts, 2, var)*n#
+#
+		############
+		## AIPTW ###
+		############
+		aiptw.fit_0 = aiptw(data=O, Ynodes=Ynodes, Anodes=Anodes, Cnodes=NULL, abar=rep(0,time.pt), cum.g=ltmle.fit_0$cum.g, Qform=ltmle.fit_0$formulas$Qform, SL.library=NULL, stratify=FALSE)#
+		aiptw.fit_1 = aiptw(data=O, Ynodes=Ynodes, Anodes=Anodes, Cnodes=NULL, abar=rep(1,time.pt), cum.g=ltmle.fit_1$cum.g, Qform=ltmle.fit_1$formulas$Qform, SL.library=NULL, stratify=FALSE)#
+		out.a_0 = c(psi.tmle.a_0=ltmle.fit_0$estimates[["tmle"]], psi.aiptw.a_0=aiptw.fit_0$estimate, variance.tmle.ic.a_0=var(ltmle.fit_0$IC$tmle), variance.aiptw.ic.a_0=var(aiptw.fit_0$IC), variance.robust.a_0=ltmle.fit_0$variance.estimate, variance.bootTMLE.wt.a_0=bootVar[["tmle.wt.psi.a_0"]], variance.bootTMLE.cov.a_0=bootVar[["tmle.cov.psi.a_0"]], variance.bootAIPTW.a_0=bootVar[["aiptw.psi_0"]])#
+		out.a_1 = c(psi.tmle.a_1=ltmle.fit_1$estimates[["tmle"]], psi.aiptw.a_1=aiptw.fit_1$estimate, variance.tmle.ic.a_1=var(ltmle.fit_1$IC$tmle), variance.aiptw.ic.a_1=var(aiptw.fit_1$IC), variance.robust.a_1=ltmle.fit_1$variance.estimate, variance.bootTMLE.wt.a_1=bootVar[["tmle.wt.psi.a_1"]], variance.bootTMLE.cov.a_1=bootVar[["tmle.cov.psi.a_1"]], variance.bootAIPTW.a_1=bootVar[["aiptw.psi_1"]])#
+		out = c(out.a_0, out.a_1)#
+		################
+		## INDICATOR ###
+		################
+#		variance.indicator.a_0 = with(ltmle.fit_1, mean(ifelse(O$A.0==0,1,0)/(cum.g[,1])^2*Qstar*(1-Qstar)))#
+#		variance.indicator.a_1 = with(ltmle.fit_1, mean(ifelse(O$A.0==1,1,0)/(cum.g[,1])^2*Qstar*(1-Qstar)))#
+##
+#		###########
+#		## IPTW ###
+#		###########
+#		variance.Dstar.a_0 = mean(with(ltmle.fit_0, Qstar*(1-Qstar)/cum.g[,1] * cum.g.unbounded[,1]/cum.g[,1]))#
+#		variance.Dstar.a_1 = mean(with(ltmle.fit_1, Qstar*(1-Qstar)/cum.g[,1] * cum.g.unbounded[,1]/cum.g[,1]))#
+#		#
+#		################
+#		## BOOTSTRAP ###
+#		################
+#		boot.data = cbind(Q.kplus1=O$Y.1, O[,Anodes,drop=F], cum.g.a_0.1=ltmle.fit_0$cum.g, Qbar.a_0.Y.1=Qbar.a_0, cum.g.a_1.1=ltmle.fit_1$cum.g, Qbar.a_1.Y.1=Qbar.a_1)#
+#		bootEsts = do.call("rbind", lapply(1:ncol(bootIndicies), function(i) psi.hat(time.pt, boot.data, bootIndicies[,i])))#
+#		variance.bootstrap.wt.a_0 = var(bootEsts[,"tmle.wt.psi.a_0"])*n#
+#		variance.bootstrap.wt.a_1 = var(bootEsts[,"tmle.wt.psi.a_1"])*n#
+#		variance.bootstrap.cov.a_0 = var(bootEsts[,"tmle.cov.psi.a_0"])*n#
+#		variance.bootstrap.cov.a_1 = var(bootEsts[,"tmle.cov.psi.a_1"])*n#
+#		#
+##		## COVERAGE (NP) ###
+##		cover.bootstrap.wt.a_0 = ifelse(quantile(bootEsts$t[,1],.025)[["2.5%"]] <= psi_0 & psi_0 <= quantile(bootEsts$t[,1],.975)[["97.5%"]], 1, 0)#
+##		cover.bootstrap.wt.a_1 = ifelse(quantile(bootEsts$t[,2],.025)[["2.5%"]] <= psi_0 & psi_0 <= quantile(bootEsts$t[,2],.975)[["97.5%"]], 1, 0)#
+##		cover.bootstrap.cov.a_0 = ifelse(quantile(bootEsts$t[,3],.025)[["2.5%"]] <= psi_0 & psi_0 <= quantile(bootEsts$t[,3],.975)[["97.5%"]], 1, 0)#
+##		cover.bootstrap.cov.a_1 = ifelse(quantile(bootEsts$t[,4],.025)[["2.5%"]] <= psi_0 & psi_0 <= quantile(bootEsts$t[,4],.975)[["97.5%"]], 1, 0)#
+#		#
+#		out.a_0 = c(psi.package.a_0=ltmle.fit_0$estimates[["tmle"]], variance.ic.a_0=var(ltmle.fit_0$IC$tmle), variance.package.a_0=ltmle.fit_0$variance.estimate, variance.Dstar.a_0=variance.Dstar.a_0, variance.indicator.a_0=variance.indicator.a_0, variance.bootstrap.wt.a_0=variance.bootstrap.wt.a_0, variance.bootstrap.cov.a_0=variance.bootstrap.cov.a_0)#
+#		out.a_1 = c(psi.package.a_1=ltmle.fit_1$estimates[["tmle"]], variance.ic.a_1=var(ltmle.fit_1$IC$tmle), variance.package.a_1=ltmle.fit_1$variance.estimate, variance.Dstar.a_1=variance.Dstar.a_1, variance.indicator.a_1=variance.indicator.a_1, variance.bootstrap.wt.a_1=variance.bootstrap.wt.a_1, variance.bootstrap.cov.a_1=variance.bootstrap.cov.a_1)#
+#		out = c(out.a_0, out.a_1)		#
+		return(out)#
+	}#
+	results[[beta]] = estimates#
+	rm(list="estimates"); gc(TRUE)#
+}#
+#saveRDS(results, file=paste0("./inst/results/simResults/t1-bootstrap-ate", sprintf("%.2f", betas_ate[eta]), ".Rds"))#
+closeCluster(superman)
+load(file="./inst/results/simResults/bootIndicies.Rda")
+set.seed(1)#
+results = vector("list", length(betas_pos))#
+#superman = makeCluster(ncores, type=cluster)#
+superman = startMPIcluster(count=ncores)#
+registerDoMPI(superman)#
+#clusterExport(cl = superman, ls())#
+exportDoMPI(cl = superman, ls())#
+cat("Cluster summary\n", getDoParRegistered(), "\n", getDoParName(), "\n", "\n", "\n")
+cat("beta:\t", sprintf("%.2f", betas_pos[beta]), "\n")#
+	#clusterExport(cl = superman, "beta")#
+	#clusterSetupRNG(superman, seed=rep(1,6))#
+	exportDoMPI(cl = superman, "beta")#
+	setRngDoMPI(cl = superman, seed=111111)#
+	estimates = foreach(i=1:n.sim, .combine="rbind", .packages=c("ltmle", "lrecVariance", "reshape", "boot")) %dopar% {#
+		O = generateData(n=n, time.pt=time.pt, beta_pos=betas_pos[beta], beta_ate=betas_ate[eta])$O#
+		O.a_0 = O.a_1 = O; O.a_0$A.0=0; O.a_1$A.0=1#
+		###################
+		## INITIAL Qbar ###
+		###################
+		Qbar.fit.true = glm(as.formula(Qform.true["Y.1"]), data=rename(O,c(Y.1="Q.kplus1")), family="binomial")#
+		Qbar.a_0 = predict(Qbar.fit.true, newdata=O.a_0, type="response")#
+		Qbar.a_1 = predict(Qbar.fit.true, newdata=O.a_1, type="response")#
+		#######################
+		## PACKAGE APPROACH ###
+		#######################
+		ltmle.fit_0 = ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, abar=rep(0,time.pt), gbounds=c(delta_0,1), SL.library=NULL, estimate.time=FALSE, stratify=FALSE, IC.variance.only=FALSE)#
+		ltmle.fit_1 = ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, abar=rep(1,time.pt), gbounds=c(delta_0,1), SL.library=NULL, estimate.time=FALSE, stratify=FALSE, IC.variance.only=FALSE)#
+		################
+		## BOOTSTRAP ###
+		################
+		boot.data = cbind(Q.kplus1=O$Y.1, O[,Anodes,drop=F], cum.g.a_0.1=ltmle.fit_0$cum.g, Qbar.a_0.Y.1=Qbar.a_0, cum.g.a_1.1=ltmle.fit_1$cum.g, Qbar.a_1.Y.1=Qbar.a_1)#
+		bootEsts = do.call("rbind", lapply(1:ncol(bootIndicies), function(i) psi.hat(time.pt, boot.data, bootIndicies[,i], aiptw=T)))#
+		bootVar = apply(bootEsts, 2, var)*n#
+#
+		############
+		## AIPTW ###
+		############
+		aiptw.fit_0 = aiptw(data=O, Ynodes=Ynodes, Anodes=Anodes, Cnodes=NULL, abar=rep(0,time.pt), cum.g=ltmle.fit_0$cum.g, Qform=ltmle.fit_0$formulas$Qform, SL.library=NULL, stratify=FALSE)#
+		aiptw.fit_1 = aiptw(data=O, Ynodes=Ynodes, Anodes=Anodes, Cnodes=NULL, abar=rep(1,time.pt), cum.g=ltmle.fit_1$cum.g, Qform=ltmle.fit_1$formulas$Qform, SL.library=NULL, stratify=FALSE)#
+		out.a_0 = c(psi.tmle.a_0=ltmle.fit_0$estimates[["tmle"]], psi.aiptw.a_0=aiptw.fit_0$estimate, variance.tmle.ic.a_0=var(ltmle.fit_0$IC$tmle), variance.aiptw.ic.a_0=var(aiptw.fit_0$IC), variance.robust.a_0=ltmle.fit_0$variance.estimate, variance.bootTMLE.wt.a_0=bootVar[["tmle.wt.psi.a_0"]], variance.bootTMLE.cov.a_0=bootVar[["tmle.cov.psi.a_0"]], variance.bootAIPTW.a_0=bootVar[["aiptw.psi_0"]])#
+		out.a_1 = c(psi.tmle.a_1=ltmle.fit_1$estimates[["tmle"]], psi.aiptw.a_1=aiptw.fit_1$estimate, variance.tmle.ic.a_1=var(ltmle.fit_1$IC$tmle), variance.aiptw.ic.a_1=var(aiptw.fit_1$IC), variance.robust.a_1=ltmle.fit_1$variance.estimate, variance.bootTMLE.wt.a_1=bootVar[["tmle.wt.psi.a_1"]], variance.bootTMLE.cov.a_1=bootVar[["tmle.cov.psi.a_1"]], variance.bootAIPTW.a_1=bootVar[["aiptw.psi_1"]])#
+		out = c(out.a_0, out.a_1)#
+		################
+		## INDICATOR ###
+		################
+#		variance.indicator.a_0 = with(ltmle.fit_1, mean(ifelse(O$A.0==0,1,0)/(cum.g[,1])^2*Qstar*(1-Qstar)))#
+#		variance.indicator.a_1 = with(ltmle.fit_1, mean(ifelse(O$A.0==1,1,0)/(cum.g[,1])^2*Qstar*(1-Qstar)))#
+##
+#		###########
+#		## IPTW ###
+#		###########
+#		variance.Dstar.a_0 = mean(with(ltmle.fit_0, Qstar*(1-Qstar)/cum.g[,1] * cum.g.unbounded[,1]/cum.g[,1]))#
+#		variance.Dstar.a_1 = mean(with(ltmle.fit_1, Qstar*(1-Qstar)/cum.g[,1] * cum.g.unbounded[,1]/cum.g[,1]))#
+#		#
+#		################
+#		## BOOTSTRAP ###
+#		################
+#		boot.data = cbind(Q.kplus1=O$Y.1, O[,Anodes,drop=F], cum.g.a_0.1=ltmle.fit_0$cum.g, Qbar.a_0.Y.1=Qbar.a_0, cum.g.a_1.1=ltmle.fit_1$cum.g, Qbar.a_1.Y.1=Qbar.a_1)#
+#		bootEsts = do.call("rbind", lapply(1:ncol(bootIndicies), function(i) psi.hat(time.pt, boot.data, bootIndicies[,i])))#
+#		variance.bootstrap.wt.a_0 = var(bootEsts[,"tmle.wt.psi.a_0"])*n#
+#		variance.bootstrap.wt.a_1 = var(bootEsts[,"tmle.wt.psi.a_1"])*n#
+#		variance.bootstrap.cov.a_0 = var(bootEsts[,"tmle.cov.psi.a_0"])*n#
+#		variance.bootstrap.cov.a_1 = var(bootEsts[,"tmle.cov.psi.a_1"])*n#
+#		#
+##		## COVERAGE (NP) ###
+##		cover.bootstrap.wt.a_0 = ifelse(quantile(bootEsts$t[,1],.025)[["2.5%"]] <= psi_0 & psi_0 <= quantile(bootEsts$t[,1],.975)[["97.5%"]], 1, 0)#
+##		cover.bootstrap.wt.a_1 = ifelse(quantile(bootEsts$t[,2],.025)[["2.5%"]] <= psi_0 & psi_0 <= quantile(bootEsts$t[,2],.975)[["97.5%"]], 1, 0)#
+##		cover.bootstrap.cov.a_0 = ifelse(quantile(bootEsts$t[,3],.025)[["2.5%"]] <= psi_0 & psi_0 <= quantile(bootEsts$t[,3],.975)[["97.5%"]], 1, 0)#
+##		cover.bootstrap.cov.a_1 = ifelse(quantile(bootEsts$t[,4],.025)[["2.5%"]] <= psi_0 & psi_0 <= quantile(bootEsts$t[,4],.975)[["97.5%"]], 1, 0)#
+#		#
+#		out.a_0 = c(psi.package.a_0=ltmle.fit_0$estimates[["tmle"]], variance.ic.a_0=var(ltmle.fit_0$IC$tmle), variance.package.a_0=ltmle.fit_0$variance.estimate, variance.Dstar.a_0=variance.Dstar.a_0, variance.indicator.a_0=variance.indicator.a_0, variance.bootstrap.wt.a_0=variance.bootstrap.wt.a_0, variance.bootstrap.cov.a_0=variance.bootstrap.cov.a_0)#
+#		out.a_1 = c(psi.package.a_1=ltmle.fit_1$estimates[["tmle"]], variance.ic.a_1=var(ltmle.fit_1$IC$tmle), variance.package.a_1=ltmle.fit_1$variance.estimate, variance.Dstar.a_1=variance.Dstar.a_1, variance.indicator.a_1=variance.indicator.a_1, variance.bootstrap.wt.a_1=variance.bootstrap.wt.a_1, variance.bootstrap.cov.a_1=variance.bootstrap.cov.a_1)#
+#		out = c(out.a_0, out.a_1)		#
+		return(out)#
+	}#
+	results[[beta]] = estimates#
+	rm(list="estimates"); gc(TRUE)#
+}#
+#saveRDS(results, file=paste0("./inst/results/simResults/t1-bootstrap-ate", sprintf("%.2f", betas_ate[eta]), ".Rds"))#
+closeCluster(superman)
+head(results[[1]])
+set.seed(1)#
+results = vector("list", length(betas_pos))#
+#superman = makeCluster(ncores, type=cluster)#
+superman = startMPIcluster(count=ncores)#
+registerDoMPI(superman)#
+#clusterExport(cl = superman, ls())#
+exportDoMPI(cl = superman, ls())#
+cat("Cluster summary\n", getDoParRegistered(), "\n", getDoParName(), "\n", "\n", "\n")#
+#
+for(beta in 1:length(betas_pos)) {#
+	cat("beta:\t", sprintf("%.2f", betas_pos[beta]), "\n")#
+	#clusterExport(cl = superman, "beta")#
+	#clusterSetupRNG(superman, seed=rep(1,6))#
+	exportDoMPI(cl = superman, "beta")#
+	setRngDoMPI(cl = superman, seed=111111)#
+	estimates = foreach(i=1:n.sim, .combine="rbind", .packages=c("ltmle", "lrecVariance", "reshape", "boot")) %dopar% {#
+		O = generateData(n=n, time.pt=time.pt, beta_pos=betas_pos[beta], beta_ate=betas_ate[eta])$O#
+		O.a_0 = O.a_1 = O; O.a_0$A.0=0; O.a_1$A.0=1#
+		###################
+		## INITIAL Qbar ###
+		###################
+		Qbar.fit.true = glm(as.formula(Qform.true["Y.1"]), data=rename(O,c(Y.1="Q.kplus1")), family="binomial")#
+		Qbar.a_0 = predict(Qbar.fit.true, newdata=O.a_0, type="response")#
+		Qbar.a_1 = predict(Qbar.fit.true, newdata=O.a_1, type="response")#
+		#######################
+		## PACKAGE APPROACH ###
+		#######################
+		ltmle.fit_0 = ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, abar=rep(0,time.pt), gbounds=c(delta_0,1), SL.library=NULL, estimate.time=FALSE, stratify=FALSE, IC.variance.only=FALSE)#
+		ltmle.fit_1 = ltmle(data=O, Anodes=Anodes, Lnodes=Lnodes, Ynodes=Ynodes, survivalOutcome=TRUE, Qform=Qform.true, gform=gform.true, abar=rep(1,time.pt), gbounds=c(delta_0,1), SL.library=NULL, estimate.time=FALSE, stratify=FALSE, IC.variance.only=FALSE)#
+		################
+		## BOOTSTRAP ###
+		################
+		boot.data = cbind(Q.kplus1=O$Y.1, O[,Anodes,drop=F], cum.g.a_0.1=ltmle.fit_0$cum.g, Qbar.a_0.Y.1=Qbar.a_0, cum.g.a_1.1=ltmle.fit_1$cum.g, Qbar.a_1.Y.1=Qbar.a_1)#
+		bootEsts = do.call("rbind", lapply(1:ncol(bootIndicies), function(i) psi.hat(time.pt, boot.data, bootIndicies[,i], aiptw=T)))#
+		bootVar = apply(bootEsts, 2, var)*n#
+#
+		############
+		## AIPTW ###
+		############
+		aiptw.fit_0 = aiptw(data=O, Ynodes=Ynodes, Anodes=Anodes, Cnodes=NULL, abar=rep(0,time.pt), cum.g=ltmle.fit_0$cum.g, Qform=ltmle.fit_0$formulas$Qform, SL.library=NULL, stratify=FALSE)#
+		aiptw.fit_1 = aiptw(data=O, Ynodes=Ynodes, Anodes=Anodes, Cnodes=NULL, abar=rep(1,time.pt), cum.g=ltmle.fit_1$cum.g, Qform=ltmle.fit_1$formulas$Qform, SL.library=NULL, stratify=FALSE)#
+		out.a_0 = c(psi.tmle.a_0=ltmle.fit_0$estimates[["tmle"]], psi.aiptw.a_0=aiptw.fit_0$estimate, variance.tmle.ic.a_0=var(ltmle.fit_0$IC$tmle), variance.aiptw.ic.a_0=var(aiptw.fit_0$IC), variance.robust.a_0=ltmle.fit_0$variance.estimate, variance.bootTMLE.wt.a_0=bootVar[["tmle.wt.psi.a_0"]], variance.bootTMLE.cov.a_0=bootVar[["tmle.cov.psi.a_0"]], variance.bootAIPTW.a_0=bootVar[["aiptw.psi_0"]])#
+		out.a_1 = c(psi.tmle.a_1=ltmle.fit_1$estimates[["tmle"]], psi.aiptw.a_1=aiptw.fit_1$estimate, variance.tmle.ic.a_1=var(ltmle.fit_1$IC$tmle), variance.aiptw.ic.a_1=var(aiptw.fit_1$IC), variance.robust.a_1=ltmle.fit_1$variance.estimate, variance.bootTMLE.wt.a_1=bootVar[["tmle.wt.psi.a_1"]], variance.bootTMLE.cov.a_1=bootVar[["tmle.cov.psi.a_1"]], variance.bootAIPTW.a_1=bootVar[["aiptw.psi_1"]])#
+		out = c(out.a_0, out.a_1)#
+		################
+		## INDICATOR ###
+		################
+#		variance.indicator.a_0 = with(ltmle.fit_1, mean(ifelse(O$A.0==0,1,0)/(cum.g[,1])^2*Qstar*(1-Qstar)))#
+#		variance.indicator.a_1 = with(ltmle.fit_1, mean(ifelse(O$A.0==1,1,0)/(cum.g[,1])^2*Qstar*(1-Qstar)))#
+##
+#		###########
+#		## IPTW ###
+#		###########
+#		variance.Dstar.a_0 = mean(with(ltmle.fit_0, Qstar*(1-Qstar)/cum.g[,1] * cum.g.unbounded[,1]/cum.g[,1]))#
+#		variance.Dstar.a_1 = mean(with(ltmle.fit_1, Qstar*(1-Qstar)/cum.g[,1] * cum.g.unbounded[,1]/cum.g[,1]))#
+#		#
+#		################
+#		## BOOTSTRAP ###
+#		################
+#		boot.data = cbind(Q.kplus1=O$Y.1, O[,Anodes,drop=F], cum.g.a_0.1=ltmle.fit_0$cum.g, Qbar.a_0.Y.1=Qbar.a_0, cum.g.a_1.1=ltmle.fit_1$cum.g, Qbar.a_1.Y.1=Qbar.a_1)#
+#		bootEsts = do.call("rbind", lapply(1:ncol(bootIndicies), function(i) psi.hat(time.pt, boot.data, bootIndicies[,i])))#
+#		variance.bootstrap.wt.a_0 = var(bootEsts[,"tmle.wt.psi.a_0"])*n#
+#		variance.bootstrap.wt.a_1 = var(bootEsts[,"tmle.wt.psi.a_1"])*n#
+#		variance.bootstrap.cov.a_0 = var(bootEsts[,"tmle.cov.psi.a_0"])*n#
+#		variance.bootstrap.cov.a_1 = var(bootEsts[,"tmle.cov.psi.a_1"])*n#
+#		#
+##		## COVERAGE (NP) ###
+##		cover.bootstrap.wt.a_0 = ifelse(quantile(bootEsts$t[,1],.025)[["2.5%"]] <= psi_0 & psi_0 <= quantile(bootEsts$t[,1],.975)[["97.5%"]], 1, 0)#
+##		cover.bootstrap.wt.a_1 = ifelse(quantile(bootEsts$t[,2],.025)[["2.5%"]] <= psi_0 & psi_0 <= quantile(bootEsts$t[,2],.975)[["97.5%"]], 1, 0)#
+##		cover.bootstrap.cov.a_0 = ifelse(quantile(bootEsts$t[,3],.025)[["2.5%"]] <= psi_0 & psi_0 <= quantile(bootEsts$t[,3],.975)[["97.5%"]], 1, 0)#
+##		cover.bootstrap.cov.a_1 = ifelse(quantile(bootEsts$t[,4],.025)[["2.5%"]] <= psi_0 & psi_0 <= quantile(bootEsts$t[,4],.975)[["97.5%"]], 1, 0)#
+#		#
+#		out.a_0 = c(psi.package.a_0=ltmle.fit_0$estimates[["tmle"]], variance.ic.a_0=var(ltmle.fit_0$IC$tmle), variance.package.a_0=ltmle.fit_0$variance.estimate, variance.Dstar.a_0=variance.Dstar.a_0, variance.indicator.a_0=variance.indicator.a_0, variance.bootstrap.wt.a_0=variance.bootstrap.wt.a_0, variance.bootstrap.cov.a_0=variance.bootstrap.cov.a_0)#
+#		out.a_1 = c(psi.package.a_1=ltmle.fit_1$estimates[["tmle"]], variance.ic.a_1=var(ltmle.fit_1$IC$tmle), variance.package.a_1=ltmle.fit_1$variance.estimate, variance.Dstar.a_1=variance.Dstar.a_1, variance.indicator.a_1=variance.indicator.a_1, variance.bootstrap.wt.a_1=variance.bootstrap.wt.a_1, variance.bootstrap.cov.a_1=variance.bootstrap.cov.a_1)#
+#		out = c(out.a_0, out.a_1)		#
+		return(out)#
+	}#
+	results[[beta]] = estimates#
+	rm(list="estimates"); gc(TRUE)#
+}#
+#saveRDS(results, file=paste0("./inst/results/simResults/t1-bootstrap-ate", sprintf("%.2f", betas_ate[eta]), ".Rds"))#
+closeCluster(superman)
+getwd()
+saveRDS(results, file=paste0("./inst/results/simResults/new-t1-bootstrap-ate", sprintf("%.2f", betas_ate[eta]), ".Rds"))
+betas_pos = seq(-2,1,.05)#
+results = results[which(betas_pos<=0)]#
+variance.mc.tmle = do.call("c", mclapply(results, function(estimates) var(estimates[,"psi.tmle.a_1"]-estimates[,"psi.tmle.a_0"])))#
+variance.mc.aiptw = do.call("c", mclapply(results, function(estimates) var(estimates[,"psi.aiptw.a_1"]-estimates[,"psi.aiptw.a_0"])))#
+variance.eic.tmle = do.call("c", mclapply(results, function(estimates) mean(estimates[,"variance.tmle.ic.a_1"]+estimates[,"variance.tmle.ic.a_0"])/n))#
+variance.eic.aiptw = do.call("c", mclapply(results, function(estimates) mean(estimates[,"variance.aiptw.ic.a_1"]+estimates[,"variance.aiptw.ic.a_0"])/n))#
+variance.boot.cov.tmle = do.call("c", mclapply(results, function(estimates) mean(estimates[,"variance.bootTMLE.cov.a_1"]+estimates[,"variance.bootTMLE.cov.a_0"])/n))#
+variance.boot.wt.tmle = do.call("c", mclapply(results, function(estimates) mean(estimates[,"variance.bootTMLE.wt.a_1"]+estimates[,"variance.bootTMLE.wt.a_0"])/n))#
+variance.boot.aiptw = do.call("c", mclapply(results, function(estimates) mean(estimates[,"variance.bootAIPTW.a_1"]+estimates[,"variance.bootAIPTW.a_0"])/n))#
+variance.robust = do.call("c", mclapply(results, function(estimates) mean(estimates[,"variance.robust.a_1"]+estimates[,"variance.robust.a_0"])/n))
+par(mfrow=c(1,2))#
+plot(NULL, xlim=c(-2,0), ylim=c(0,.05), xlab=expression(beta["p"]), ylab="Variance", main="(a) AIPTW", sub=expression(paste("(500 simulations per ", beta["p"]," setting)")), las=1, cex.main=1.5, cex.lab=1.5, cex.axis=1.15)#
+rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], col="gray90")#
+abline(v=seq(-2,0,.5), col="white", lwd=1.5)#
+abline(v=seq(-2,0,.5/2), col="white", lwd=.75)#
+abline(h=seq(0,.05,.01), col="white", lwd=1.5)#
+abline(h=seq(0,.05,.01/2), col="white", lwd=.75)#
+points(variance.eic.aiptw ~ seq(-2,0,.05), col=2, pch=0)#
+points(variance.robust ~ seq(-2,0,.05), col=3, pch=2)#
+#points(variance.boot.aiptw ~ seq(-2,0,.05), col=4, pch=5)#
+points(variance.mc.aiptw ~ seq(-2,0,.05), col=1, pch=19)#
+legend(-2,.0475, c("Mean robust EIF variance / n", "Mean empirical EIC variance / n", "Monte-Carlo variance"), pch=c(2,0,19), col=c(3,2,1), bg="white", cex=1.25)
+plot(NULL, xlim=c(-2,0), ylim=c(0,.05), xlab=expression(beta["p"]), ylab="Variance", main="(b) TMLE", sub=expression(paste("(500 simulations per ", beta["p"]," setting)")), las=1, cex.main=1.5, cex.lab=1.5, cex.axis=1.15)#
+rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], col="gray90")#
+abline(v=seq(-2,0,.5), col="white", lwd=1.5)#
+abline(v=seq(-2,0,.5/2), col="white", lwd=.75)#
+abline(h=seq(0,.05,.01), col="white", lwd=1.5)#
+abline(h=seq(0,.05,.01/2), col="white", lwd=.75)#
+points(variance.eic.tmle ~ seq(-2,0,.05), col=2, pch=0)#
+points(variance.robust ~ seq(-2,0,.05), col=3, pch=2)#
+points(variance.boot.cov.tmle ~ seq(-2,0,.05), col=4, pch=5)#
+#points(variance.boot.wt.tmle ~ seq(-2,0,.05), col=4, pch=6)#
+points(variance.mc.tmle ~ seq(-2,0,.05), col=1, pch=19)#
+legend(-2,.05, c("Mean robust EIF variance / n", "Mean bootstrap variance", "Mean empirical EIC variance / n", "Monte-Carlo variance"), pch=c(2,5,0,19), col=c(3,4,2,1), bg="white", cex=1.25)
+pdf("./inst/results/new-t1-variance_aiptw_tmle.pdf", height=6, width=12)#
+par(mfrow=c(1,2))#
+plot(NULL, xlim=c(-2,0), ylim=c(0,.05), xlab=expression(beta["p"]), ylab="Variance", main="(a) AIPTW", sub=expression(paste("(500 simulations per ", beta["p"]," setting)")), las=1, cex.main=1.5, cex.lab=1.5, cex.axis=1.15)#
+rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], col="gray90")#
+abline(v=seq(-2,0,.5), col="white", lwd=1.5)#
+abline(v=seq(-2,0,.5/2), col="white", lwd=.75)#
+abline(h=seq(0,.05,.01), col="white", lwd=1.5)#
+abline(h=seq(0,.05,.01/2), col="white", lwd=.75)#
+points(variance.eic.aiptw ~ seq(-2,0,.05), col=2, pch=0)#
+points(variance.robust ~ seq(-2,0,.05), col=3, pch=2)#
+#points(variance.boot.aiptw ~ seq(-2,0,.05), col=4, pch=5)#
+points(variance.mc.aiptw ~ seq(-2,0,.05), col=1, pch=19)#
+legend(-2,.0475, c("Mean robust EIF variance / n", "Mean empirical EIC variance / n", "Monte-Carlo variance"), pch=c(2,0,19), col=c(3,2,1), bg="white", cex=1.25)#
+#
+plot(NULL, xlim=c(-2,0), ylim=c(0,.05), xlab=expression(beta["p"]), ylab="Variance", main="(b) TMLE", sub=expression(paste("(500 simulations per ", beta["p"]," setting)")), las=1, cex.main=1.5, cex.lab=1.5, cex.axis=1.15)#
+rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], col="gray90")#
+abline(v=seq(-2,0,.5), col="white", lwd=1.5)#
+abline(v=seq(-2,0,.5/2), col="white", lwd=.75)#
+abline(h=seq(0,.05,.01), col="white", lwd=1.5)#
+abline(h=seq(0,.05,.01/2), col="white", lwd=.75)#
+points(variance.eic.tmle ~ seq(-2,0,.05), col=2, pch=0)#
+points(variance.robust ~ seq(-2,0,.05), col=3, pch=2)#
+points(variance.boot.cov.tmle ~ seq(-2,0,.05), col=4, pch=5)#
+#points(variance.boot.wt.tmle ~ seq(-2,0,.05), col=4, pch=6)#
+points(variance.mc.tmle ~ seq(-2,0,.05), col=1, pch=19)#
+legend(-2,.05, c("Mean robust EIF variance / n", "Mean bootstrap variance", "Mean empirical EIC variance / n", "Monte-Carlo variance"), pch=c(2,5,0,19), col=c(3,4,2,1), bg="white", cex=1.25)#
+#legend(-2,.05, c("Mean robust EIF variance / n", "Mean bootstrap variance", "Mean empirical EIC variance / n", "Monte-Carlo variance"), pch=c(2,5,0,19), col=c(3,4,2,1), bg="white", cex=1.25)#
+#
+dev.off()
